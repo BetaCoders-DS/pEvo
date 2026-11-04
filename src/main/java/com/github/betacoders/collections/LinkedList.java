@@ -1,0 +1,275 @@
+package com.github.betacoders.collections;
+
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+
+/*
+ * LinkedList
+ * Classe genérica de lista linkada.
+ * Deverá ser usada para as filas da simulação
+ */
+public class LinkedList<T> implements List<T> {
+  private class Node {
+    private T item;
+    private Node prev = null;
+    private Node next = null;
+
+    private Node(T item) {
+      this.item = item;
+    }
+  }
+
+  private Node head = null;
+  private Node tail = null;
+  private int size = 0;
+
+  public int size() {
+    return size;
+  }
+
+  public boolean isEmpty() {
+    return size == 0;
+  }
+
+  public void addFirst(T item) {
+    Node n = new Node(item);
+    if (head == null) {
+      head = tail = n;
+    } else {
+      head.prev = n;
+      n.next = head;
+      head = n;
+    }
+    ++size;
+  }
+
+  public boolean addLast(T item) {
+    Node n = new Node(item);
+    if (tail == null) {
+      head = tail = n;
+    } else {
+      tail.next = n;
+      n.prev = tail;
+      tail = n;
+    }
+    ++size;
+    return true;
+  }
+
+  public T peekFirst() {
+    return head == null ? null : head.item;
+  }
+
+  public T peekLast() {
+    return tail == null ? null : tail.item;
+  }
+
+  public T removeFirst() {
+    if (head == null)
+      return null;
+    T i = head.item;
+    remove(head);
+    return i;
+  }
+
+  public T removeLast() {
+    if (tail == null)
+      return null;
+    T i = tail.item;
+    remove(tail);
+    return i;
+  }
+
+  public boolean contains(T item) {
+    return indexOf(item) != -1;
+  }
+
+  public int indexOf(T item) {
+    int idx = 0;
+    Node n = head;
+    while (n != null) {
+      if (n.item == item)
+        return idx;
+      n = n.next;
+      ++idx;
+    }
+    return -1;
+  }
+
+  public void remove(T item) {
+    if (item == null)
+      return;
+    Node n = head;
+    while (n != null) {
+      if (n.item == item) {
+        remove(n);
+        return;
+      }
+      n = n.next;
+    }
+    return;
+  }
+
+  private void remove(Node n) {
+    if (n.next != null)
+      n.next.prev = n.prev;
+    if (n.prev != null)
+      n.prev.next = n.next;
+    if (n == head)
+      head = n.next;
+    if (n == tail)
+      tail = n.prev;
+    n.next = null;
+    n.prev = null;
+    --size;
+  }
+
+  private Node nodeAt(int i) {
+    Node n;
+    if (i <= (size >> 1)) {
+      n = head;
+      while (i > 0 && n != null) {
+        n = n.next;
+        --i;
+      }
+    } else {
+      n = tail;
+      int j = size - i - 1;
+      while (j > 0 && n != null) {
+        n = n.prev;
+        --j;
+      }
+    }
+    return n;
+  }
+
+  public T get(int i) {
+    Node n = nodeAt(i);
+    return n == null ? null : n.item;
+  }
+
+  @Override
+  public void insert(int i, T item) {
+    Node newN = new Node(item);
+    Node n = nodeAt(i);
+
+    if (n == null)
+      throw new IndexOutOfBoundsException();
+
+    newN.prev = n.prev;
+    newN.next = n;
+    n.prev = newN;
+  }
+
+  public T remove(int i) {
+    Node n = nodeAt(i);
+    if (n == null)
+      return null;
+    T item = n.item;
+    remove(n);
+    return item;
+  }
+
+  @Override
+  public void set(int i, T val) {
+    nodeAt(i).item = val;
+  }
+
+  @Override
+  public boolean add(T item) {
+    return this.addLast(item);
+  }
+
+  public void clear() {
+    head = tail = null;
+    size = 0;
+  }
+
+  /* Merge Sort */
+  public void sort(Comparator<T> cmp) {
+    if (size() < 2)
+      return;
+
+    for (int w = 1; w < size(); w *= 2) {
+      Node start = head;
+      Node dummy = new Node(null);
+      Node nTail = dummy;
+
+      while (start != null) {
+        Node left = start;
+        Node right = split(left, w);
+        start = (right != null) ? split(right, w) : null;
+
+        while (left != null && right != null) {
+          int comp = cmp.compare(left.item, right.item);
+          if (comp > 0) {
+            nTail.next = right;
+            right.prev = nTail;
+            right = right.next;
+          } else {
+            nTail.next = left;
+            left.prev = nTail;
+            left = left.next;
+          }
+          nTail = nTail.next;
+        }
+
+        Node rest = (left == null) ? right : left;
+        if (rest != null) {
+          nTail.next = rest;
+          rest.prev = nTail;
+          while (nTail.next != null)
+            nTail = nTail.next;
+        }
+      }
+
+      head = dummy.next;
+      if (head != null)
+        head.prev = null;
+      tail = nTail;
+    }
+  }
+
+  private Node split(Node n, int count) {
+    while (--count > 0 && n.next != null)
+      n = n.next;
+    Node next = n.next;
+    n.next = null;
+    if (next != null)
+      next.prev = null;
+    return next;
+  }
+
+  private class ListIterator implements Iterator<T> {
+    private Node cur = head;
+
+    @Override
+    public boolean hasNext() {
+      return cur != null;
+    }
+
+    @Override
+    public T next() {
+      if (cur == null)
+        throw new NoSuchElementException();
+      T item = cur.item;
+      cur = cur.next;
+      return item;
+    }
+  }
+
+  @Override
+  public Iterator<T> iterator() {
+    return new ListIterator();
+  }
+
+  @Override
+  public boolean addAll(List<T> list) {
+    boolean result = false;
+    for (T item : list)
+      result |= this.addLast(item);
+
+    return result;
+  }
+}
