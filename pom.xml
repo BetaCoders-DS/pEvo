@@ -41,6 +41,13 @@
       <artifactId>junit-jupiter-params</artifactId>
       <scope>test</scope>
     </dependency>
+
+    <dependency>
+      <groupId>org.processing</groupId>
+      <artifactId>core</artifactId>
+      <version>4.5.6</version>
+      <scope>compile</scope>
+    </dependency>
   </dependencies>
 
   <build>
