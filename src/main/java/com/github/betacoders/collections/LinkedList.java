@@ -28,10 +28,6 @@ public class LinkedList<T> implements List<T> {
     return size;
   }
 
-  public boolean isEmpty() {
-    return size == 0;
-  }
-
   public void addFirst(T item) {
     Node n = new Node(item);
     if (head == null) {
@@ -97,18 +93,18 @@ public class LinkedList<T> implements List<T> {
     return -1;
   }
 
-  public void remove(T item) {
+  public boolean remove(T item) {
     if (item == null)
-      return;
+      return false;
     Node n = head;
     while (n != null) {
       if (n.item == item) {
         remove(n);
-        return;
+        return true;
       }
       n = n.next;
     }
-    return;
+    return false;
   }
 
   private void remove(Node n) {
@@ -150,7 +146,7 @@ public class LinkedList<T> implements List<T> {
   }
 
   @Override
-  public void insert(int i, T item) {
+  public void add(int i, T item) {
     Node newN = new Node(item);
     Node n = nodeAt(i);
 
@@ -172,8 +168,11 @@ public class LinkedList<T> implements List<T> {
   }
 
   @Override
-  public void set(int i, T val) {
+  public T set(int i, T val) {
+    T old = nodeAt(i).item;
     nodeAt(i).item = val;
+
+    return old;
   }
 
   @Override

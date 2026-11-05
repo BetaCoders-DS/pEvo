@@ -1,8 +1,6 @@
 package com.github.betacoders.collections;
 
 import java.util.Arrays;
-import java.util.Iterator;
-import java.util.NoSuchElementException;
 
 /**
  * Vector
@@ -36,14 +34,14 @@ public class Vector<T> implements List<T> {
     return (T) data[i];
   }
 
-  public void set(int i, T item) {
+  public T set(int i, T item) {
     checkIndex(i);
+    T old = (T) data[i];
+
     data[i] = item;
     this.size = Math.max(size, i + 1);
-  }
 
-  public boolean isEmpty() {
-    return size == 0;
+    return old;
   }
 
   public boolean push(T v) {
@@ -102,7 +100,7 @@ public class Vector<T> implements List<T> {
     return -1;
   }
 
-  public void insert(int i, T item) {
+  public void add(int i, T item) {
     if (i < 0 || i > size)
       throw new ArrayIndexOutOfBoundsException(i);
     if (size == cap)
@@ -125,10 +123,14 @@ public class Vector<T> implements List<T> {
   }
 
   @Override
-  public void remove(T item) {
+  public boolean remove(T item) {
     for (int i = 0; i < size; ++i)
-      if (this.get(i) == item)
+      if (this.get(i) == item) {
         remove(i);
+        return true;
+      }
+
+    return false;
   }
 
   @Override
@@ -149,26 +151,5 @@ public class Vector<T> implements List<T> {
   public void clear() {
     Arrays.fill(data, 0, size, null);
     size = 0;
-  }
-
-  private class VectorIterator implements Iterator<T> {
-    private int idx = 0;
-
-    @Override
-    public boolean hasNext() {
-      return idx < size;
-    }
-
-    @Override
-    public T next() {
-      if (idx >= size)
-        throw new NoSuchElementException();
-      return (T) data[idx++];
-    }
-  }
-
-  @Override
-  public Iterator<T> iterator() {
-    return new VectorIterator();
   }
 }
