@@ -2,7 +2,7 @@ package com.github.betacoders.collections;
 
 import java.util.Arrays;
 
-public class Graph {
+public class GridGraph {
   @FunctionalInterface
   public interface CoordinateConsumer {
     void accept(int x, int y);
@@ -21,11 +21,11 @@ public class Graph {
   private final int[] costs;
   private final int[] portals;
 
-  public Graph(int width, int height) {
+  public GridGraph(int width, int height) {
     this(width, height, DEFAULT_COST);
   }
 
-  public Graph(int width, int height, int defaultCost) {
+  public GridGraph(int width, int height, int defaultCost) {
     this.width = width;
     this.height = height;
     int totalNodes = width * height;
