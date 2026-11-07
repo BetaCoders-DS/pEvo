@@ -1,17 +1,14 @@
 package com.github.betacoders.collections;
 
+import java.util.Iterator;
+
 public class HashSet<E> implements Set<E> {
+  private static final Object DUMMY = new Object();
   private final Map<E, Object> map = new HashMap<>();
-  private int count;
 
   @Override
   public boolean add(E e) {
-    if (map.get(e) != null) {
-      return false;
-    }
-    map.put(e, Boolean.TRUE);
-    ++count;
-    return true;
+    return map.put(e, DUMMY) == null;
   }
 
   @Override
@@ -21,6 +18,11 @@ public class HashSet<E> implements Set<E> {
 
   @Override
   public int size() {
-    return count;
+    return map.size();
+  }
+
+  @Override
+  public Iterator<E> iterator() {
+    return map.keySet().iterator();
   }
 }
