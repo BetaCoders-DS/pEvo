@@ -1,32 +1,29 @@
 package com.github.betacoders.collections;
 
 import java.util.Arrays;
+import java.util.Objects;
 
-/**
- * Vector
- * Implementação genérica de um vetor dinâmico
- */
 public class Vector<T> implements List<T> {
-  public final int INIT_CAP = 2;
-  public final int CAP_MULT = 2;
+  private static final int INIT_CAP = 2;
+  private static final int CAP_MULT = 2;
+
   private int size;
-  private int cap = INIT_CAP;
+  private int cap;
   private Object[] data;
 
   public Vector() {
-    data = new Object[cap];
-    size = 0;
+    this(INIT_CAP);
   }
 
   public Vector(int cap) {
-    data = new Object[cap];
     this.cap = cap;
-    size = 0;
+    this.data = new Object[cap];
+    this.size = 0;
   }
 
   private void checkIndex(int i) {
-    if (i < 0 || i >= cap)
-      throw new ArrayIndexOutOfBoundsException(i);
+    if (i < 0 || i >= size)
+      throw new IndexOutOfBoundsException(i);
   }
 
   public T get(int i) {
@@ -37,21 +34,14 @@ public class Vector<T> implements List<T> {
   public T set(int i, T item) {
     checkIndex(i);
     T old = (T) data[i];
-
     data[i] = item;
-    this.size = Math.max(size, i + 1);
-
     return old;
   }
 
   public boolean push(T v) {
-    if (v == null)
-      return false;
-
     if (size == cap)
       increase();
     data[size++] = v;
-
     return true;
   }
 
@@ -93,16 +83,15 @@ public class Vector<T> implements List<T> {
   }
 
   public int indexOf(T item) {
-    for (int i = 0; i < size; ++i) {
-      if (data[i] == item)
+    for (int i = 0; i < size; ++i)
+      if (Objects.equals(data[i], item))
         return i;
-    }
     return -1;
   }
 
   public void add(int i, T item) {
     if (i < 0 || i > size)
-      throw new ArrayIndexOutOfBoundsException(i);
+      throw new IndexOutOfBoundsException(i);
     if (size == cap)
       increase();
     for (int j = size; j > i; --j)
@@ -113,8 +102,7 @@ public class Vector<T> implements List<T> {
 
   @Override
   public T remove(int i) {
-    if (i < 0 || i >= size)
-      throw new ArrayIndexOutOfBoundsException(i);
+    checkIndex(i);
     T out = (T) data[i];
     for (int j = i; j < size - 1; ++j)
       data[j] = data[j + 1];
@@ -124,27 +112,23 @@ public class Vector<T> implements List<T> {
 
   @Override
   public boolean remove(T item) {
-    for (int i = 0; i < size; ++i)
-      if (this.get(i) == item) {
-        remove(i);
-        return true;
-      }
-
-    return false;
+    int idx = indexOf(item);
+    if (idx == -1)
+      return false;
+    remove(idx);
+    return true;
   }
 
   @Override
   public boolean add(T item) {
-    return this.push(item);
+    return push(item);
   }
 
   @Override
-  public boolean addAll(List<T> list) {
+  public boolean addAll(Collection<? extends T> list) {
     boolean result = false;
-
     for (T v : list)
-      result |= this.add(v);
-
+      result |= add(v);
     return result;
   }
 
