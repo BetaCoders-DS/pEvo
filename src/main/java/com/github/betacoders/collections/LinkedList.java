@@ -264,7 +264,7 @@ public class LinkedList<T> implements List<T> {
   }
 
   @Override
-  public boolean addAll(List<T> list) {
+  public boolean addAll(Collection<? extends T> list) {
     boolean result = false;
     for (T item : list)
       result |= this.addLast(item);
