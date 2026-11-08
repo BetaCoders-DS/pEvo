@@ -22,11 +22,11 @@ public class Grid<T> {
     this.data[toIndex(x, y)] = t;
   }
 
-  public int getWidth() {
+  public int width() {
     return sizeX;
   }
 
-  public int getHeight() {
+  public int height() {
     return sizeY;
   }
 
