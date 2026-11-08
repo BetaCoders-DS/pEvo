@@ -1,4 +1,4 @@
-package com.github.betacoders.map.tiles;
+package com.github.betacoders.world.tiles;
 
 /**
  * Entities

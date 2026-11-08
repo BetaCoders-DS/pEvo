@@ -1,6 +1,6 @@
-package com.github.betacoders.map;
+package com.github.betacoders.world;
 
-import com.github.betacoders.map.tiles.BackTile;
+import com.github.betacoders.world.tiles.BackTile;
 
 /**
  * BackLayer

@@ -1,6 +1,6 @@
-package com.github.betacoders.map;
+package com.github.betacoders.world;
 
-import com.github.betacoders.map.tiles.StaticTile;
+import com.github.betacoders.world.tiles.StaticTile;
 
 /**
  * StaticLayer

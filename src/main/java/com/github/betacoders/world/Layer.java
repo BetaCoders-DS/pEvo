@@ -1,4 +1,4 @@
-package com.github.betacoders.map;
+package com.github.betacoders.world;
 
 import com.github.betacoders.collections.GridInt;
 
