@@ -123,15 +123,15 @@ public class GridGraph {
     return x >= 0 && x < width && y >= 0 && y < height;
   }
 
-  private int pack(int x, int y) {
+  public int pack(int x, int y) {
     return y * width + x;
   }
 
-  private int unpackX(int index) {
+  public int unpackX(int index) {
     return index % width;
   }
 
-  private int unpackY(int index) {
+  public int unpackY(int index) {
     return index / width;
   }
 }
