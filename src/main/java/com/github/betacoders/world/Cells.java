@@ -11,8 +11,8 @@ public sealed abstract class Cells {
   protected float hp;
   protected final float hpMax;
   protected Vector2D pos;
-  protected final float mass;
-  protected final double rad;
+  protected final float mass; // grams
+  protected final double rad; // px
 
   protected static final float NORMAL_MASS = 100.f;
   protected static final float NORMAL_HP = 100.f;
@@ -108,21 +108,22 @@ public sealed abstract class Cells {
     }
 
     public boolean tick() {
-      if (stored >= cap) {
+      if (stored >= cap)
         return false;
-      }
+
       if (--cooldown <= 0) {
         cooldown = interval;
         ++stored;
         return true;
       }
+
       return false;
     }
 
     public boolean consume() {
-      if (stored <= 0) {
+      if (stored <= 0)
         return false;
-      }
+
       --stored;
       return true;
     }
@@ -131,10 +132,10 @@ public sealed abstract class Cells {
   public static final class Turret extends Cells {
     private final int cap;
     private int stored;
-    private final double range;
+    private final double range; // px
     private final float shotDamage;
-    private final int shotInterval;
-    private int cooldown;
+    private final double shotInterval; // seconds
+    private double cooldown; // seconds
 
     public Turret(int id, double x, double y, int cap, double range, float fireDamage, int fireInterval) {
       super(id,
@@ -168,9 +169,9 @@ public sealed abstract class Cells {
     }
 
     public boolean receiveAmmo() {
-      if (stored >= cap) {
+      if (stored >= cap)
         return false;
-      }
+
       ++stored;
       return true;
     }
@@ -179,16 +180,15 @@ public sealed abstract class Cells {
       return stored > 0 && cooldown <= 0;
     }
 
-    public void tickCooldown() {
-      if (cooldown > 0) {
-        --cooldown;
-      }
+    public void tickCooldown(double dt) {
+      if (cooldown > 0)
+        cooldown = Math.max(cooldown - dt, 0.);
     }
 
     public boolean shoot() {
-      if (!canShoot()) {
+      if (!canShoot())
         return false;
-      }
+
       --stored;
       cooldown = shotInterval;
       return true;

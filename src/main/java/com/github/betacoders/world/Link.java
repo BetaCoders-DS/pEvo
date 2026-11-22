@@ -8,7 +8,7 @@ import com.github.betacoders.collections.Vector2D;
 public final class Link {
   private final Cells a;
   private final Cells b;
-  private final double length;
+  private final double length; // px
   private int load;
 
   private final static double LOAD_COST_MULT = 10.;
@@ -45,8 +45,8 @@ public final class Link {
   }
 
   public void leave() {
-    if (load > 0) {
+    if (load > 0)
       --load;
-    }
+
   }
 }
