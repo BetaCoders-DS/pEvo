@@ -2,7 +2,7 @@ package com.github.betacoders.world;
 
 import com.github.betacoders.collections.Graph;
 import com.github.betacoders.collections.List;
-import com.github.betacoders.collections.Vector2D;
+import com.github.betacoders.collections.Vec2D;
 
 /**
  * Packet
@@ -40,20 +40,20 @@ public final class Packet {
     return path.get(path.size() - 1);
   }
 
-  public Vector2D pos() {
+  public Vec2D pos() {
     if (path.size() == 0)
-      return new Vector2D(0, 0);
+      return new Vec2D(0, 0);
 
     if (done || hop + 1 >= path.size())
       return path.get(path.size() - 1).pos();
 
-    Vector2D start = path.get(hop).pos();
-    Vector2D end = path.get(hop + 1).pos();
+    Vec2D start = path.get(hop).pos();
+    Vec2D end = path.get(hop + 1).pos();
 
     double x = start.x + (end.x - start.x) * progress;
     double y = start.y + (end.y - start.y) * progress;
 
-    return new Vector2D(x, y);
+    return new Vec2D(x, y);
   }
 
   public void step(Graph<Cells, Link> graph, double dt) {

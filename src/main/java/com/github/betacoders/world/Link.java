@@ -1,6 +1,6 @@
 package com.github.betacoders.world;
 
-import com.github.betacoders.collections.Vector2D;
+import com.github.betacoders.collections.Vec2D;
 
 /**
  * Link
@@ -16,7 +16,7 @@ public final class Link {
   public Link(Cells a, Cells b) {
     this.a = a;
     this.b = b;
-    this.length = Vector2D.dist(a.pos(), b.pos());
+    this.length = Vec2D.dist(a.pos(), b.pos());
     this.load = 0;
   }
 

@@ -1,6 +1,6 @@
 package com.github.betacoders.world;
 
-import com.github.betacoders.collections.Vector2D;
+import com.github.betacoders.collections.Vec2D;
 
 /**
  * Cell
@@ -10,7 +10,7 @@ public sealed abstract class Cells {
 
   protected float hp;
   protected final float hpMax;
-  protected Vector2D pos;
+  protected Vec2D pos;
   protected final float mass; // grams
   protected final double rad; // px
 
@@ -18,7 +18,7 @@ public sealed abstract class Cells {
   protected static final float NORMAL_HP = 100.f;
   protected static final double NORMAL_RAD = 25.;
 
-  protected Cells(int id, float hpMax, Vector2D pos, float mass, double radius) {
+  protected Cells(int id, float hpMax, Vec2D pos, float mass, double radius) {
     this.id = id;
     this.hp = hpMax;
     this.hpMax = hpMax;
@@ -39,7 +39,7 @@ public sealed abstract class Cells {
     return hpMax;
   }
 
-  public Vector2D pos() {
+  public Vec2D pos() {
     return pos;
   }
 
@@ -64,7 +64,7 @@ public sealed abstract class Cells {
       super(
           id,
           NORMAL_HP * 10,
-          new Vector2D(x, y),
+          new Vec2D(x, y),
           NORMAL_MASS * 10,
           NORMAL_RAD * 1.25);
     }
@@ -74,7 +74,7 @@ public sealed abstract class Cells {
     public Relay(int id, double x, double y) {
       super(id,
           NORMAL_HP,
-          new Vector2D(x, y),
+          new Vec2D(x, y),
           NORMAL_MASS,
           NORMAL_RAD);
     }
@@ -89,7 +89,7 @@ public sealed abstract class Cells {
     public Extractor(int id, double x, double y, int cap, int interval) {
       super(id,
           NORMAL_HP,
-          new Vector2D(x, y),
+          new Vec2D(x, y),
           NORMAL_MASS * 2,
           NORMAL_RAD * 1.1);
 
@@ -140,7 +140,7 @@ public sealed abstract class Cells {
     public Turret(int id, double x, double y, int cap, double range, float fireDamage, int fireInterval) {
       super(id,
           NORMAL_HP * 0.8f,
-          new Vector2D(x, y),
+          new Vec2D(x, y),
           NORMAL_MASS * 0.6f,
           NORMAL_RAD * 0.8);
 
