@@ -10,14 +10,18 @@ import com.github.betacoders.collections.Vector;
 /**
  * World
  */
-public class World {
+public class Base {
   private final Graph<Cells, Link> graph;
   private Cells.Core core;
   private final AStarPathfinder<Cells, Link> pathfinder;
   private final List<Packet> packets;
   private final Random rng;
 
-  public World(Graph<Cells, Link> graph, long seed) {
+  private int wave = 1;
+  private boolean over = false;
+  private int tick = 0;
+
+  public Base(Graph<Cells, Link> graph, long seed) {
     this.graph = graph;
     this.rng = new Random(seed);
 
@@ -49,4 +53,23 @@ public class World {
     return packets;
   }
 
+  public int wave() {
+    return wave;
+  }
+
+  public boolean over() {
+    return over;
+  }
+
+  public double totalEdgeLength() {
+    return 0;
+  }
+
+  public void step() {
+
+  }
+
+  public int ticks() {
+    return tick;
+  }
 }
