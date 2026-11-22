@@ -20,6 +20,7 @@ public class Base {
   private int wave = 1;
   private boolean over = false;
   private int tick = 0;
+  private int enemiesKilled = 0;
 
   public Base(Graph<Cells, Link> graph, long seed) {
     this.graph = graph;
@@ -71,5 +72,9 @@ public class Base {
 
   public int ticks() {
     return tick;
+  }
+
+  public int enemiesKilled() {
+    return enemiesKilled;
   }
 }
