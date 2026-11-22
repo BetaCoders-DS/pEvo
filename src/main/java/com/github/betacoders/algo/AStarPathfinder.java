@@ -1,4 +1,4 @@
-package com.github.betacoders.world;
+package com.github.betacoders.algo;
 
 import com.github.betacoders.collections.Graph;
 import com.github.betacoders.collections.HashMap;
