@@ -1,95 +1,108 @@
 package com.github.betacoders.world;
 
-import com.github.betacoders.collections.GridGraph;
+import com.github.betacoders.collections.Graph;
+import com.github.betacoders.collections.HashMap;
+import com.github.betacoders.collections.List;
+import com.github.betacoders.collections.Map;
+import com.github.betacoders.collections.Vector;
 import java.util.PriorityQueue;
+import java.util.function.ToIntBiFunction;
+import java.util.function.ToIntFunction;
 
-public class AStarPathfinder {
+/**
+ * AStarPathfinder
+ * 
+ * @param <T> Vertex type
+ * @param <E> Edge Type
+ */
+public class AStarPathfinder<T, E> {
 
-  private record Node(int index, int fScore) implements Comparable<Node> {
+  private record Node<T>(T vertex, int distToStart) implements Comparable<Node<T>> {
     @Override
-    public int compareTo(Node o) {
-      return Integer.compare(this.fScore, o.fScore);
+    public int compareTo(Node<T> other) {
+      return Integer.compare(this.distToStart, other.distToStart);
     }
   }
 
-  private final GridGraph graph;
-  private final int[] gScore;
-  private final int[] cameFrom;
-  private final int[] visitedRun;
-  private int runId;
+  private final Graph<T, E> graph;
+  private final ToIntFunction<E> edgeCost;
+  private final ToIntBiFunction<T, T> heuristic;
+  private final Map<T, Integer> toHereCost = new HashMap<>();
+  private final Map<T, T> prevVertex = new HashMap<>();
+  private final Map<T, Integer> lastVisitedAt = new HashMap<>();
+  private int searchId;
 
-  public AStarPathfinder(GridGraph graph) {
+  public AStarPathfinder(Graph<T, E> graph, ToIntFunction<E> edgeCost) {
+    this(graph, edgeCost, (vertex, target) -> 0);
+  }
+
+  public AStarPathfinder(Graph<T, E> graph, ToIntFunction<E> edgeCost,
+      ToIntBiFunction<T, T> heuristic) {
     this.graph = graph;
-    int maxNodes = graph.width() * graph.height();
-    this.gScore = new int[maxNodes];
-    this.cameFrom = new int[maxNodes];
-    this.visitedRun = new int[maxNodes];
+    this.edgeCost = edgeCost;
+    this.heuristic = heuristic;
   }
 
-  public int[] findPath(int startX, int startY, int targetX, int targetY) {
-    if (!graph.isTraversable(startX, startY) || !graph.isTraversable(targetX, targetY))
-      return new int[0];
+  public static <T> AStarPathfinder<T, Integer> weighted(Graph<T, Integer> graph) {
+    return new AStarPathfinder<>(graph, cost -> cost);
+  }
 
-    runId++;
-    int startIndex = graph.pack(startX, startY);
-    int targetIndex = graph.pack(targetX, targetY);
+  public List<T> findPath(T start, T target) {
+    if (start == null || target == null || !graph.containsVertex(start)
+        || !graph.containsVertex(target))
+      return new Vector<>();
 
-    visitedRun[startIndex] = runId;
-    gScore[startIndex] = 0;
-    cameFrom[startIndex] = -1;
+    ++searchId;
+    toHereCost.put(start, 0);
+    prevVertex.put(start, null);
+    lastVisitedAt.put(start, searchId);
 
-    PriorityQueue<Node> openSet = new PriorityQueue<>();
-    openSet.add(new Node(startIndex, heuristic(startX, startY, targetX, targetY)));
+    PriorityQueue<Node<T>> toVisit = new PriorityQueue<>();
+    toVisit.add(new Node<>(start, heuristic.applyAsInt(start, target)));
 
-    while (!openSet.isEmpty()) {
-      int curr = openSet.poll().index();
+    while (!toVisit.isEmpty()) {
+      T current = toVisit.poll().vertex();
 
-      if (curr == targetIndex)
-        return reconstructPath(targetIndex);
+      if (current.equals(target))
+        return buildPath(target);
 
-      int currX = graph.unpackX(curr);
-      int currY = graph.unpackY(curr);
-
-      graph.forEachNeighbor(currX, currY,
-          (nx, ny) -> relaxNeighbor(curr, currX, currY, nx, ny, targetX, targetY, openSet));
+      graph.forEachNeighbor(current,
+          (neighbor, edge) -> considerNeighbor(current, neighbor, edge, target, toVisit));
     }
 
-    return new int[0];
+    return new Vector<>();
   }
 
-  private void relaxNeighbor(int curr, int currX, int currY, int nx, int ny, int targetX, int targetY,
-      PriorityQueue<Node> openSet) {
-    int weight = graph.getEdgeWeight(currX, currY, nx, ny);
-    if (weight == GridGraph.BLOCKED)
+  private void considerNeighbor(T current, T neighbor, E edge, T target,
+      PriorityQueue<Node<T>> toVisit) {
+    if (edge == null)
       return;
 
-    int nIndex = graph.pack(nx, ny);
-    int tentativeG = gScore[curr] + weight;
-
-    if (visitedRun[nIndex] == runId && tentativeG >= gScore[nIndex])
+    int stepCost = edgeCost.applyAsInt(edge);
+    if (stepCost < 0)
       return;
 
-    visitedRun[nIndex] = runId;
-    gScore[nIndex] = tentativeG;
-    cameFrom[nIndex] = curr;
-    openSet.add(new Node(nIndex, tentativeG + heuristic(nx, ny, targetX, targetY)));
+    int candidateCost = toHereCost.get(current) + stepCost;
+    Integer lastVisit = lastVisitedAt.get(neighbor);
+    if (lastVisit != null && lastVisit.intValue() == searchId
+        && candidateCost >= toHereCost.get(neighbor))
+      return;
+
+    lastVisitedAt.put(neighbor, searchId);
+    toHereCost.put(neighbor, candidateCost);
+    prevVertex.put(neighbor, current);
+    toVisit.add(new Node<>(neighbor,
+        candidateCost + heuristic.applyAsInt(neighbor, target)));
   }
 
-  private int heuristic(int x1, int y1, int x2, int y2) {
-    return Math.abs(x1 - x2) + Math.abs(y1 - y2);
-  }
+  private List<T> buildPath(T target) {
+    Vector<T> reversedPath = new Vector<>();
+    for (T current = target; current != null; current = prevVertex.get(current))
+      reversedPath.push(current);
 
-  private int[] reconstructPath(int targetIndex) {
-    int length = 0;
-    for (int curr = targetIndex; curr != -1; curr = cameFrom[curr])
-      length++;
-
-    int[] path = new int[length];
-    int curr = targetIndex;
-    for (int i = length - 1; i >= 0; i--) {
-      path[i] = curr;
-      curr = cameFrom[curr];
-    }
+    Vector<T> path = new Vector<>(reversedPath.size());
+    for (int i = reversedPath.size() - 1; i >= 0; --i)
+      path.push(reversedPath.get(i));
 
     return path;
   }
