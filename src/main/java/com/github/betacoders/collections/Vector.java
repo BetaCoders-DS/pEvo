@@ -119,6 +119,26 @@ public class Vector<T> implements List<T> {
     return true;
   }
 
+  /**
+   * Removes item from index i by swaping it with the last element and poping.
+   * Does not preserve order.
+   * O(1)
+   *
+   * @param i index of the item to remove
+   * @return removed item
+   */
+  public T swapRemove(int i) {
+    int last = size - 1;
+
+    T rem = null;
+    if (i != last)
+      rem = set(i, get(last));
+    else
+      rem = pop();
+
+    return rem;
+  }
+
   @Override
   public boolean add(T item) {
     return push(item);
