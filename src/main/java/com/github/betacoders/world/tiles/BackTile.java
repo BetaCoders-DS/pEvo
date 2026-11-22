@@ -5,5 +5,7 @@ package com.github.betacoders.world.tiles;
  * background non collidable tiles
  */
 public enum BackTile {
-
+  FLOOR,
+  GRASS,
+  SAND
 }
