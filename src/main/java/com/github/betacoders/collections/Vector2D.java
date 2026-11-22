@@ -40,13 +40,12 @@ public final class Vector2D {
     return new Vector2D(x, y);
   }
 
-  public double dist(Vector2D other) {
-    return Math.sqrt((other.x - this.x) * (other.x - this.x) +
-        (other.y - this.y) * (other.y - this.y));
+  public static double dist(Vector2D from, Vector2D to) {
+    return Math.hypot((to.x - from.x), (to.y - from.y));
   }
 
-  public double distSq(Vector2D other) {
-    return (other.x - this.x) * (other.x - this.x) +
-        (other.y - this.y) * (other.y - this.y);
+  public static double distSq(Vector2D from, Vector2D to) {
+    return (to.x - from.x) * (to.x - from.x) +
+        (to.y - from.y) * (to.y - from.y);
   }
 }
