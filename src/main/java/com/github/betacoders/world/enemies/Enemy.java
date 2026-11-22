@@ -8,24 +8,27 @@ import com.github.betacoders.world.World;
  *
  * Base dos inimigos. Sem Processing: só Vec2D e Math, para rodar headless.
  * Unidades: px, px/s, g, s.
+ *
+ * Usa só o que o Vec2D atual tem: campos x/y, multiply, divide.
+ * Operações extras (normalizar, limitar, somar escalado) são helpers privados aqui.
  */
-public abstract class Enemy {
-protected static final double DRAG = 1.0;
 
+public abstract class Enemy {
+  protected static final double DRAG = 1.0; 
   protected final Vec2D pos;
   protected final Vec2D vel = new Vec2D();
 
-  protected final double mass;
-  protected final double velMax;
-  protected final double forceMax;
+  protected final double mass; // g
+  protected final double velMax; // px/s
+  protected final double forceMax; // g*px/s^2
 
   protected final float hpMax;
   protected float hp;
 
   protected final float attackDamage;
-  protected final double attackRange;
-  protected final double attackInterval;
-  protected double cooldown;
+  protected final double attackRange; // px
+  protected final double attackInterval; // s
+  protected double cooldown; // s
 
   protected Damageable target;
 
@@ -46,13 +49,10 @@ protected static final double DRAG = 1.0;
     this.attackInterval = attackInterval;
     this.cooldown = 0.;
   }
-   
-  public abstract boolean flying();
 
-  /** Um tick. Subtipo escolhe alvo, chama seek/stop, tickCooldown, tryAttack e integrate. */
+  public abstract boolean flying();
   public abstract void update(World world, double dt);
 
-  // ---------- estado ----------
 
   public Vec2D pos() {
     return pos;
@@ -91,8 +91,8 @@ protected static final double DRAG = 1.0;
   }
 
   protected void stop() {
-    desired.x = 0.;
-    desired.y = 0.;
+    desired.x = 0;
+    desired.y = 0;
     applySteering();
   }
 
@@ -102,5 +102,50 @@ protected static final double DRAG = 1.0;
     limitInPlace(steer, forceMax);
     acc.x = steer.x / mass;
     acc.y = steer.y / mass;
+  }
+
+  protected void integrate(double dt) {
+    vel.x += acc.x * dt;
+    vel.y += acc.y * dt;
+
+    vel.multiply(Math.max(0., 1. - DRAG * dt));
+    limitInPlace(vel, velMax);
+
+    pos.x += vel.x * dt;
+    pos.y += vel.y * dt;
+
+    acc.x = 0;
+    acc.y = 0;
+  }
+
+  protected void tickCooldown(double dt) {
+    if (cooldown > 0)
+      cooldown = Math.max(0., cooldown - dt);
+  }
+
+  protected boolean inRange(Damageable t) {
+    return t != null && t.alive() && t.distanceFrom(pos) <= attackRange;
+  }
+
+  protected boolean tryAttack() {
+    if (cooldown > 0 || !inRange(target))
+      return false;
+
+    target.damage(attackDamage);
+    cooldown = attackInterval;
+    return true;
+  }
+
+  private static void normalizeInPlace(Vec2D v) {
+    double len = Math.sqrt(v.x * v.x + v.y * v.y);
+    if (len > 0)
+      v.divide(len);
+  }
+
+  private static void limitInPlace(Vec2D v, double max) {
+    if (v.x * v.x + v.y * v.y > max * max) {
+      normalizeInPlace(v);
+      v.multiply(max);
+    }
   }
 }
