@@ -8,19 +8,19 @@ import processing.core.PApplet;
 public class Sketch extends PApplet {
   @Override
   public void settings() {
-    // TODO Auto-generated method stub
     super.settings();
+    size(1000, 700);
   }
 
   @Override
   public void setup() {
-    // TODO Auto-generated method stub
     super.setup();
+    frameRate(60);
   }
 
   @Override
   public void draw() {
-    // TODO Auto-generated method stub
     super.draw();
+    background(18, 20, 28);
   }
 }
