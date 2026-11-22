@@ -46,35 +46,61 @@ protected static final double DRAG = 1.0;
     this.attackInterval = attackInterval;
     this.cooldown = 0.;
   }
+   
+  public abstract boolean flying();
 
-    public abstract boolean flying();
-    public abstract void update(World world, double dt);
+  /** Um tick. Subtipo escolhe alvo, chama seek/stop, tickCooldown, tryAttack e integrate. */
+  public abstract void update(World world, double dt);
 
-    public Vec2D pos() {
-        return pos;
-    }
+  // ---------- estado ----------
 
-    public Vec2D vel() {
-        return vel;
-    }
+  public Vec2D pos() {
+    return pos;
+  }
 
-    public float hp() {
-        return hp;
-    }
+  public Vec2D vel() {
+    return vel;
+  }
 
-    public float hpMax() {
-        return hpMax;
-    }
+  public float hp() {
+    return hp;
+  }
 
-    public boolean alive() {
-        return hp > 0f;
-    }
-    
-    public void damage(float amount) {
-        hp = Math.max(0f, hp - amount);
-    }
+  public float hpMax() {
+    return hpMax;
+  }
 
-    public Damageable target() {
-        return target;
-    }
+  public boolean alive() {
+    return hp > 0f;
+  }
+
+  public void damage(float amount) {
+    hp = Math.max(0f, hp - amount);
+  }
+
+  public Damageable target() {
+    return target;
+  }
+
+  protected void seek(double tx, double ty) {
+    desired.x = tx - pos.x;
+    desired.y = ty - pos.y;
+    normalizeInPlace(desired);
+    desired.multiply(velMax);
+    applySteering();
+  }
+
+  protected void stop() {
+    desired.x = 0.;
+    desired.y = 0.;
+    applySteering();
+  }
+
+  private void applySteering() {
+    steer.x = desired.x - vel.x;
+    steer.y = desired.y - vel.y;
+    limitInPlace(steer, forceMax);
+    acc.x = steer.x / mass;
+    acc.y = steer.y / mass;
+  }
 }
