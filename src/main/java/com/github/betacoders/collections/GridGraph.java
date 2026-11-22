@@ -3,7 +3,6 @@ package com.github.betacoders.collections;
 import java.util.Arrays;
 
 public class GridGraph {
-  @FunctionalInterface
   public interface CoordinateConsumer {
     void accept(int x, int y);
   }
