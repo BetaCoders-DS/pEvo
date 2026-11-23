@@ -1,5 +1,6 @@
 package com.github.betacoders.sketch;
 
+import com.github.betacoders.world.DemoWorld;
 import processing.core.PApplet;
 
 /**
@@ -11,6 +12,8 @@ import processing.core.PApplet;
  *   draw()     -> repetidamente, a cada frame (60)
  */
 public class Sketch extends PApplet {
+  // O mundo que será mostrado (por enquanto, o de demonstração).
+  private DemoWorld world;
 
   @Override
   public void settings() {
@@ -24,6 +27,15 @@ public class Sketch extends PApplet {
     super.setup();
     // Quantos fps o draw() deve rodar.
     frameRate(60);
+
+    // Cria o mundo com o mesmo tamanho da janela.
+    world = new DemoWorld(1000, 700);
+
+    // Teste: confirma no console que a Base foi montada.
+    // Esperado: 11 células (1 Core + 4 Relays + 2 Extractors + 4 Turrets)
+    // e 16 links (arestas do grafo).
+    System.out.println("Células: " + world.base().graph().size());
+    System.out.println("Links: " + world.base().graph().edgeCount());
   }
 
   @Override
