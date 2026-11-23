@@ -59,6 +59,10 @@ public sealed abstract class Cells {
     hp = Math.max(0f, hp - amount);
   }
 
+  public boolean tick() {
+    return this.alive();
+  }
+
   public static final class Core extends Cells {
     public Core(int id, double x, double y) {
       super(
@@ -107,17 +111,19 @@ public sealed abstract class Cells {
       return stored;
     }
 
+    @Override
     public boolean tick() {
-      if (stored >= cap)
+      if (!alive())
         return false;
 
-      if (--cooldown <= 0) {
-        cooldown = interval;
-        ++stored;
-        return true;
-      }
+      if (stored < cap)
 
-      return false;
+        if (--cooldown <= 0) {
+          cooldown = interval;
+          ++stored;
+        }
+
+      return true;
     }
 
     public boolean consume() {
@@ -134,8 +140,8 @@ public sealed abstract class Cells {
     private int stored;
     private final double range; // px
     private final float shotDamage;
-    private final double shotInterval; // seconds
-    private double cooldown; // seconds
+    private final int shotInterval; // ticks
+    private int cooldown; // ticks
 
     public Turret(int id, double x, double y, int cap, double range, float fireDamage, int fireInterval) {
       super(id,
@@ -180,9 +186,15 @@ public sealed abstract class Cells {
       return stored > 0 && cooldown <= 0;
     }
 
-    public void tickCooldown(double dt) {
+    @Override
+    public boolean tick() {
+      if (!alive())
+        return false;
+
       if (cooldown > 0)
-        cooldown = Math.max(cooldown - dt, 0.);
+        --cooldown;
+
+      return true;
     }
 
     public boolean shoot() {

@@ -9,7 +9,7 @@ import com.github.betacoders.collections.Vec2D;
  */
 public final class Packet {
   private final List<Cells> path;
-  private final double speed; // px/s
+  private final double speed; // px/tick
   private int hop;
   private double progress; // 0 - 1
   private Link currentLink;
@@ -56,9 +56,9 @@ public final class Packet {
     return new Vec2D(x, y);
   }
 
-  public void step(Graph<Cells, Link> graph, double dt) {
+  public boolean tick(Graph<Cells, Link> graph) {
     if (done)
-      return;
+      return false;
 
     Cells from = path.get(hop);
     Cells to = path.get(hop + 1);
@@ -66,14 +66,14 @@ public final class Packet {
     if (!from.alive() || !to.alive() || currentLink == null) {
       releaseLink();
       done = true;
-      return;
+      return true;
     }
 
     double len = currentLink.length();
-    progress += (speed / len) * dt;
+    progress += speed / len;
 
-    while (progress >= 1.0 && !done) {
-      progress = 0.;
+    while (progress >= 1. && !done) {
+      progress -= 1.;
       releaseLink();
       ++hop;
 
@@ -82,7 +82,7 @@ public final class Packet {
         if (to instanceof Cells.Turret turret && turret.alive())
           turret.receiveAmmo();
 
-        return;
+        return true;
       }
 
       Cells nextFrom = path.get(hop);
@@ -91,10 +91,12 @@ public final class Packet {
       currentLink = graph.getEdge(nextFrom, nextTo);
       if (currentLink == null || !nextTo.alive()) {
         done = true;
-        return;
+        return true;
       }
       currentLink.enter();
     }
+
+    return true;
   }
 
   private void releaseLink() {
