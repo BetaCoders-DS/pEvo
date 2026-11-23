@@ -1,10 +1,12 @@
 package com.github.betacoders.evolution;
 
-import java.util.ArrayDeque;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Objects;
-import java.util.Set;
+
+import com.github.betacoders.collections.HashSet;
+import com.github.betacoders.collections.ImmutableList;
+import com.github.betacoders.collections.LinkedList;
+import com.github.betacoders.collections.List;
+import com.github.betacoders.collections.Set;
 
 public final class BaseGenome {
     public static final double BORDER_MARGIN = 40.0;
@@ -57,8 +59,8 @@ public final class BaseGenome {
 
         this.width = width;
         this.height = height;
-        this.cells = List.copyOf(cells);
-        this.edges = List.copyOf(edges);
+        this.cells = new ImmutableList<>(cells);
+        this.edges = new ImmutableList<>(edges);
 
         validateCells();
 
@@ -153,10 +155,10 @@ public final class BaseGenome {
 
     static boolean[] reachable(int count, List<EdgeGene> edges) {
         boolean[] visited = new boolean[count];
-        ArrayDeque<Integer> pending = new ArrayDeque<>();
+        LinkedList<Integer> pending = new LinkedList<>();
 
         visited[0] = true;
-        pending.add(0);
+        pending.addLast(0);
 
         while (!pending.isEmpty()) {
             int current = pending.removeFirst();
