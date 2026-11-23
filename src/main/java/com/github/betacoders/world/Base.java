@@ -11,19 +11,18 @@ import com.github.betacoders.collections.List;
 import com.github.betacoders.collections.Vector;
 
 public class Base {
+    public static final int TICKS_PER_SECOND = 60;
+
     private final Graph<Cells, Link> graph;
     private Cells.Core core;
     private final AStarPathfinder<Cells, Link> pathfinder;
     private final List<Packet> packets;
     private final Random rng;
 
-    // Número da onda atual. Começamos na onda 1.
     private int wave = 1;
     private boolean over = false;
     private int tick = 0;
-
     private int enemiesKilled = 0;
-    private double survivalSeconds = 0.0;
 
     public Base(Graph<Cells, Link> graph, long seed) {
         this.graph = Objects.requireNonNull(
@@ -87,7 +86,7 @@ public class Base {
     }
 
     public boolean over() {
-        return over;
+        return over || !core.alive();
     }
 
     public int ticks() {
@@ -99,12 +98,11 @@ public class Base {
     }
 
     public double survivalSeconds() {
-        return survivalSeconds;
+        return tick / (double) TICKS_PER_SECOND;
     }
 
     public double totalEdgeLength() {
         Set<Link> uniqueEdges = new HashSet<>();
-
 
         for (Cells cell : graph) {
             graph.forEachNeighbor(
@@ -123,39 +121,24 @@ public class Base {
     }
 
     public void recordEnemyKilled() {
-        if (!over) {
+        if (!over()) {
             enemiesKilled++;
         }
     }
 
-
     public void completeWave() {
-        if (!over && core.alive()) {
+        if (!over()) {
             wave++;
         }
     }
 
-    public void step(double dt) {
-        if (!Double.isFinite(dt) || dt <= 0.0) {
-            throw new IllegalArgumentException(
-                "dt deve ser finito e maior que zero."
-            );
-        }
-
-        if (over) {
-            return;
-        }
-        if (!core.alive()) {
+    public boolean tick() {
+        if (over()) {
             over = true;
-            return;
+            return false;
         }
 
         tick++;
-        survivalSeconds += dt;
-
-
-        if (!core.alive()) {
-            over = true;
-        }
+        return true;
     }
 }
