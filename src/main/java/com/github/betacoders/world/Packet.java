@@ -9,7 +9,7 @@ import com.github.betacoders.collections.Vec2D;
  */
 public final class Packet {
   private final List<Cells> path;
-  private final double speed; // px/s
+  private final double speed; // px/tick
   private int hop;
   private double progress; // 0 - 1
   private Link currentLink;
@@ -56,7 +56,7 @@ public final class Packet {
     return new Vec2D(x, y);
   }
 
-  public void step(Graph<Cells, Link> graph, double dt) {
+  public void step(Graph<Cells, Link> graph) {
     if (done)
       return;
 
@@ -70,10 +70,10 @@ public final class Packet {
     }
 
     double len = currentLink.length();
-    progress += (speed / len) * dt;
+    progress += speed / len;
 
-    while (progress >= 1.0 && !done) {
-      progress = 0.;
+    while (progress >= 1. && !done) {
+      progress -= 1.;
       releaseLink();
       ++hop;
 

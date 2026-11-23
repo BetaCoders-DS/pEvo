@@ -66,8 +66,11 @@ public class Base {
     return 0;
   }
 
-  public void step() {
+  public boolean tick() {
+    if (over())
+      return false;
 
+    return true;
   }
 
   public int ticks() {
