@@ -26,7 +26,7 @@ public class Base {
   private int tick = 0;
   private int enemiesKilled = 0;
 
-  private double totalEdgeLength;
+  private final double totalEdgeLength;
 
   public Base(Graph<Cells, Link> graph, long seed) {
     this.graph = Objects.requireNonNull(
@@ -49,7 +49,6 @@ public class Base {
         }
 
         core = c;
-        break;
       }
 
     if (core == null)
@@ -119,18 +118,12 @@ public class Base {
 
   private void pruneDeadCells() {
     List<Cells> verts = graph.vertices();
-    boolean removed = false;
 
     for (int i = verts.size() - 1; i >= 0; --i) {
       Cells cell = verts.get(i);
-      if (!cell.alive()) {
+      if (!cell.alive())
         graph.removeVertex(cell);
-        removed = true;
-      }
     }
-
-    if (removed)
-      totalEdgeLength = sumEdgeLengths();
   }
 
   private void tickCells() {
