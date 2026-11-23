@@ -1,7 +1,11 @@
 package com.github.betacoders.world;
 
 public interface Simulation {
-    Base base();
+  World world();
 
-    void tick();
+  default Base base() {
+    return world().base();
+  }
+
+  void tick();
 }

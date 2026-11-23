@@ -3,13 +3,13 @@ package com.github.betacoders.evolution;
 import java.util.Arrays;
 import java.util.Objects;
 
-import com.github.betacoders.world.Base;
 import com.github.betacoders.world.Simulation;
+import com.github.betacoders.world.World;
 
 public final class GenerationEvaluation {
   private final int generation;
   private final Simulation[] simulations;
-  private final Base[] bases;
+  private final World[] worlds;
   private final double[] initialEdgeLengths;
   private final SimulationResult[] results;
 
@@ -34,7 +34,7 @@ public final class GenerationEvaluation {
 
     this.generation = generation;
     this.simulations = simulations.clone();
-    this.bases = new Base[simulations.length];
+    this.worlds = new World[simulations.length];
     this.initialEdgeLengths = new double[simulations.length];
     this.results = new SimulationResult[simulations.length];
 
@@ -42,33 +42,38 @@ public final class GenerationEvaluation {
       Simulation simulation = Objects.requireNonNull(
           this.simulations[i], "Simulation must not be null.");
 
-      Base base = Objects.requireNonNull(
-          simulation.base(), "Simulation must provide a base.");
+      World world = Objects.requireNonNull(
+          simulation.world(), "Simulation must provide a world.");
 
-      if (base.over()
-          || base.ticks() != 0
-          || base.enemiesKilled() != 0
-          || base.wavesCompleted() != 0) {
+      if (world.over()
+          || world.ticks() != 0
+          || world.enemiesKilled() != 0
+          || world.wavesCompleted() != 0) {
         throw new IllegalArgumentException(
             "Generation requires fresh simulations.");
       }
 
+      if (world.base() == null) {
+        throw new IllegalArgumentException(
+            "World must provide a base.");
+      }
+
       for (int j = 0; j < i; j++) {
-        if (bases[j] == base
-            || bases[j].graph() == base.graph()) {
+        if (worlds[j] == world
+            || worlds[j].base() == world.base()) {
           throw new IllegalArgumentException(
               "Individuals must use separate bases and graphs.");
         }
       }
 
-      double length = base.totalEdgeLength();
+      double length = world.base().totalEdgeLength();
 
       if (!Double.isFinite(length) || length < 0.0) {
         throw new IllegalArgumentException(
             "Initial edge length is invalid.");
       }
 
-      bases[i] = base;
+      worlds[i] = world;
       initialEdgeLengths[i] = length;
     }
   }
@@ -83,30 +88,30 @@ public final class GenerationEvaluation {
         continue;
       }
 
-      ensureSameBase(i);
+      ensureSameWorld(i);
 
-      Base base = bases[i];
+      World world = worlds[i];
 
-      if (!base.over()) {
-        int previousTicks = base.ticks();
+      if (!world.over()) {
+        int previousTicks = world.ticks();
 
         simulations[i].tick();
 
-        ensureSameBase(i);
+        ensureSameWorld(i);
 
-        if (base.ticks() != previousTicks + 1) {
+        if (world.ticks() != previousTicks + 1) {
           throw new IllegalStateException(
-              "Simulation must advance exactly one base tick.");
+              "Simulation must advance exactly one world tick.");
         }
       }
 
-      if (base.over()) {
+      if (world.over()) {
         results[i] = new SimulationResult(
             generation,
             i,
-            base.wavesCompleted(),
-            base.enemiesKilled(),
-            base.ticks(),
+            world.wavesCompleted(),
+            world.enemiesKilled(),
+            world.ticks(),
             initialEdgeLengths[i]);
 
         defeatsRegistered++;
@@ -114,10 +119,12 @@ public final class GenerationEvaluation {
     }
   }
 
-  private void ensureSameBase(int index) {
-    if (simulations[index].base() != bases[index]) {
+  private void ensureSameWorld(int index) {
+    World current = simulations[index].world();
+    if (current != worlds[index]
+        || current.base() != worlds[index].base()) {
       throw new IllegalStateException(
-          "Simulation replaced its base during evaluation.");
+          "Simulation replaced its world during evaluation.");
     }
   }
 

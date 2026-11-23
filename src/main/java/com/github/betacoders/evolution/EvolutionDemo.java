@@ -6,6 +6,7 @@ import com.github.betacoders.world.Base;
 import com.github.betacoders.world.Cells;
 import com.github.betacoders.world.Link;
 import com.github.betacoders.world.Simulation;
+import com.github.betacoders.world.World;
 
 public final class EvolutionDemo {
   public static void main(String[] args) {
@@ -29,8 +30,8 @@ public final class EvolutionDemo {
   }
 
   private static void verifyGenerationEvaluation() {
-    TestSimulation compact = new TestSimulation(1000.0, 1);
-    TestSimulation longer = new TestSimulation(2000.0, 2);
+    TestSimulation compact = new TestSimulation(1000.0, 2);
+    TestSimulation longer = new TestSimulation(2000.0, 1);
 
     GenerationEvaluation evaluation = new GenerationEvaluation(
         1,
@@ -63,10 +64,8 @@ public final class EvolutionDemo {
           "All simulations should be finished.");
     }
 
-    evaluation.step();
-
-    if (compact.base().ticks() != 1
-        || longer.base().ticks() != 2) {
+    if (compact.world().ticks() != 2
+        || longer.world().ticks() != 1) {
       throw new AssertionError(
           "Defeated simulations must stop advancing.");
     }
@@ -98,7 +97,7 @@ public final class EvolutionDemo {
     for (SimulationResult result : ranking) {
       System.out.printf(
           "Base %d | Waves: %d | Kills: %d"
-              + " | Time: %.4f ticks | Edge length: %.2f"
+              + " | Time: %d ticks | Edge length: %.2f"
               + " | Score: %.2f%n",
           result.individualId(),
           result.wavesCompleted(),
@@ -110,7 +109,7 @@ public final class EvolutionDemo {
   }
 
   private static final class TestSimulation implements Simulation {
-    private final Base base;
+    private final World world;
     private final int deathTick;
 
     private TestSimulation(double length, int deathTick) {
@@ -121,29 +120,33 @@ public final class EvolutionDemo {
 
       graph.addEdge(core, relay, new Link(core, relay));
 
-      this.base = new Base(graph, 42L);
+      Base base = new Base(graph);
+      this.world = new World(base);
       this.deathTick = deathTick;
     }
 
     @Override
-    public Base base() {
-      return base;
+    public World world() {
+      return world;
     }
 
     @Override
     public void tick() {
-      if (!base.tick()) {
+      if (world.over()) {
         return;
       }
 
-      if (base.ticks() == 1) {
-        base.recordEnemyKilled();
-        base.completeWave();
+      if (world.ticks() == 1) {
+        world.recordEnemyKilled();
+        world.completeWave();
       }
 
-      if (base.ticks() >= deathTick) {
-        base.core().damage(base.core().hp());
+      if (world.ticks() + 1 >= deathTick) {
+        Cells.Core core = world.base().core();
+        core.damage(core.hp());
       }
+
+      world.tick();
     }
   }
 }

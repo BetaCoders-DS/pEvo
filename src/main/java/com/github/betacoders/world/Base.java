@@ -1,7 +1,6 @@
 package com.github.betacoders.world;
 
 import java.util.Objects;
-import java.util.Random;
 
 import com.github.betacoders.algo.AStarPathfinder;
 import com.github.betacoders.collections.Graph;
@@ -19,20 +18,12 @@ public class Base {
   private Cells.Core core;
   private final AStarPathfinder<Cells, Link> pathfinder;
   private final Vector<Packet> packets;
-  private final Random rng;
 
-  private int wave = 1;
-  private boolean over = false;
-  private int tick = 0;
-  private int enemiesKilled = 0;
+  private final double totalEdgeLength;
 
-  private double totalEdgeLength;
-
-  public Base(Graph<Cells, Link> graph, long seed) {
+  public Base(Graph<Cells, Link> graph) {
     this.graph = Objects.requireNonNull(
         graph, "O grafo é obrigatório.");
-
-    this.rng = new Random(seed);
 
     this.pathfinder = new AStarPathfinder<>(
         graph,
@@ -49,7 +40,6 @@ public class Base {
         }
 
         core = c;
-        break;
       }
 
     if (core == null)
@@ -85,52 +75,23 @@ public class Base {
     return packets;
   }
 
-  public int wave() {
-    return wave;
-  }
-
-  public int wavesCompleted() {
-    return wave - 1;
-  }
-
   public boolean tick() {
-    if (over)
-      return false;
-
-    if (core == null || !core.alive()) {
-      over = true;
-      return false;
-    }
-
-    ++tick;
-
     pruneDeadCells();
     tickCells();
     dispatchAmmo();
     tickPackets();
 
-    if (!core.alive()) {
-      over = true;
-      return false;
-    }
-
-    return true;
+    return core.alive();
   }
 
   private void pruneDeadCells() {
     List<Cells> verts = graph.vertices();
-    boolean removed = false;
 
     for (int i = verts.size() - 1; i >= 0; --i) {
       Cells cell = verts.get(i);
-      if (!cell.alive()) {
+      if (!cell.alive())
         graph.removeVertex(cell);
-        removed = true;
-      }
     }
-
-    if (removed)
-      totalEdgeLength = sumEdgeLengths();
   }
 
   private void tickCells() {
@@ -195,30 +156,7 @@ public class Base {
     }
   }
 
-  public boolean over() {
-    return over;
-  }
-
-  public int ticks() {
-    return tick;
-  }
-
-  public int enemiesKilled() {
-    return enemiesKilled;
-  }
-
   public double totalEdgeLength() {
     return totalEdgeLength;
-  }
-
-  public void recordEnemyKilled() {
-    if (!over())
-      enemiesKilled++;
-  }
-
-  public void completeWave() {
-    if (!over()) {
-      wave++;
-    }
   }
 }
