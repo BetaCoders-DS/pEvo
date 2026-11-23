@@ -1,80 +1,161 @@
 package com.github.betacoders.world;
 
+import java.util.HashSet;
+import java.util.Objects;
 import java.util.Random;
+import java.util.Set;
 
 import com.github.betacoders.algo.AStarPathfinder;
 import com.github.betacoders.collections.Graph;
 import com.github.betacoders.collections.List;
 import com.github.betacoders.collections.Vector;
 
-/**
- * World
- */
 public class Base {
-  private final Graph<Cells, Link> graph;
-  private Cells.Core core;
-  private final AStarPathfinder<Cells, Link> pathfinder;
-  private final List<Packet> packets;
-  private final Random rng;
+    private final Graph<Cells, Link> graph;
+    private Cells.Core core;
+    private final AStarPathfinder<Cells, Link> pathfinder;
+    private final List<Packet> packets;
+    private final Random rng;
 
-  private int wave = 1;
-  private boolean over = false;
-  private int tick = 0;
-  private int enemiesKilled = 0;
+    // Número da onda atual. Começamos na onda 1.
+    private int wave = 1;
+    private boolean over = false;
+    private int tick = 0;
 
-  public Base(Graph<Cells, Link> graph, long seed) {
-    this.graph = graph;
-    this.rng = new Random(seed);
+    private int enemiesKilled = 0;
+    private double survivalSeconds = 0.0;
 
-    this.pathfinder = new AStarPathfinder<>(graph, Link::cost,
-        (a, b) -> (int) Math.hypot(
-            a.pos().x - b.pos().x,
-            a.pos().y - b.pos().y));
+    public Base(Graph<Cells, Link> graph, long seed) {
+        this.graph = Objects.requireNonNull(
+            graph, "O grafo é obrigatório."
+        );
 
-    this.packets = new Vector<>();
+        this.rng = new Random(seed);
 
-    for (Cells cell : graph)
-      if (cell instanceof Cells.Core c)
-        this.core = c;
-  }
+        this.pathfinder = new AStarPathfinder<>(
+            graph,
+            Link::cost,
+            (a, b) -> (int) Math.hypot(
+                a.pos().x - b.pos().x,
+                a.pos().y - b.pos().y
+            )
+        );
 
-  public Graph<Cells, Link> graph() {
-    return graph;
-  }
+        this.packets = new Vector<>();
 
-  public Cells.Core core() {
-    return core;
-  }
+        for (Cells cell : graph) {
+            if (cell instanceof Cells.Core c) {
+                if (core != null) {
+                    throw new IllegalArgumentException(
+                        "A base deve ter apenas um núcleo."
+                    );
+                }
 
-  public AStarPathfinder<Cells, Link> pathfinder() {
-    return pathfinder;
-  }
+                core = c;
+            }
+        }
 
-  public List<Packet> packets() {
-    return packets;
-  }
+        if (core == null) {
+            throw new IllegalArgumentException(
+                "A base precisa de um núcleo."
+            );
+        }
+    }
 
-  public int wave() {
-    return wave;
-  }
+    public Graph<Cells, Link> graph() {
+        return graph;
+    }
 
-  public boolean over() {
-    return over;
-  }
+    public Cells.Core core() {
+        return core;
+    }
 
-  public double totalEdgeLength() {
-    return 0;
-  }
+    public AStarPathfinder<Cells, Link> pathfinder() {
+        return pathfinder;
+    }
 
-  public void step(double dt) {
+    public List<Packet> packets() {
+        return packets;
+    }
 
-  }
+    public int wave() {
+        return wave;
+    }
 
-  public int ticks() {
-    return tick;
-  }
+    public int wavesCompleted() {
+        return wave - 1;
+    }
 
-  public int enemiesKilled() {
-    return enemiesKilled;
-  }
+    public boolean over() {
+        return over;
+    }
+
+    public int ticks() {
+        return tick;
+    }
+
+    public int enemiesKilled() {
+        return enemiesKilled;
+    }
+
+    public double survivalSeconds() {
+        return survivalSeconds;
+    }
+
+    public double totalEdgeLength() {
+        Set<Link> uniqueEdges = new HashSet<>();
+
+
+        for (Cells cell : graph) {
+            graph.forEachNeighbor(
+                cell,
+                (neighbor, link) -> uniqueEdges.add(link)
+            );
+        }
+
+        double total = 0.0;
+
+        for (Link link : uniqueEdges) {
+            total += link.length();
+        }
+
+        return total;
+    }
+
+    public void recordEnemyKilled() {
+        if (!over) {
+            enemiesKilled++;
+        }
+    }
+
+
+    public void completeWave() {
+        if (!over && core.alive()) {
+            wave++;
+        }
+    }
+
+    public void step(double dt) {
+        if (!Double.isFinite(dt) || dt <= 0.0) {
+            throw new IllegalArgumentException(
+                "dt deve ser finito e maior que zero."
+            );
+        }
+
+        if (over) {
+            return;
+        }
+        if (!core.alive()) {
+            over = true;
+            return;
+        }
+
+        tick++;
+        survivalSeconds += dt;
+
+
+        if (!core.alive()) {
+            over = true;
+        }
+    }
 }
