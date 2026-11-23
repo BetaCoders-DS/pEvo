@@ -388,6 +388,22 @@ public final class DemoWorld {
   public Base base() {
     return base;
   }
+  
+    public ArrayList<Enemy> enemies() {
+    return enemies;
+  }
+
+  public ArrayList<Shot> shots() {
+    return shots;
+  }
+
+  public int kills() {
+    return kills;
+  }
+
+  public int ticks() {
+    return ticks;
+  }
 
   public double width() {
     return width;
