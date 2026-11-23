@@ -32,29 +32,17 @@ public class WaveSim implements Simulation {
         26., 30, 14., 45., 300.);
 
     public WaveConfig {
-      if (baseCount < 1
-          || countGrowth < 0.
-          || spawnInterval < 1
-          || interWaveDelay < 0
-          || spawnRadius <= 0.
-          || radiusGrowth < 0.
-          || hpBase <= 0f
-          || hpGrowth < 0.
-          || attackDamageBase < 0f
-          || attackDamageGrowth < 0.
-          || attackRange < 0.
-          || attackInterval < 1
-          || rad <= 0.
-          || velMax <= 0.
-          || forceMax <= 0.) {
-        throw new IllegalArgumentException(
-            "Invalid wave configuration.");
+      if (baseCount < 1 || countGrowth < 0. || spawnInterval < 1 || interWaveDelay < 0 || spawnRadius <= 0.
+          || radiusGrowth < 0. || hpBase <= 0f || hpGrowth < 0. || attackDamageBase < 0f || attackDamageGrowth < 0.
+          || attackRange < 0. || attackInterval < 1 || rad <= 0. || velMax <= 0. || forceMax <= 0.) {
+
+        throw new IllegalArgumentException("Invalid wave configuration.");
       }
     }
   }
 
   public interface WaveFactory {
-    List<Enemy> create(int wave, Random rng, WaveConfig config, Vec2D core, int firstId);
+    List<Enemy> create(int wave, Random rng, WaveConfig config, int firstId);
   }
 
   private final World world;
@@ -89,20 +77,18 @@ public class WaveSim implements Simulation {
   }
 
   private static List<Enemy> createDefaultWave(
-      int wave, Random rng, WaveConfig config, Vec2D core, int firstId) {
+      int wave, Random rng, WaveConfig config, int firstId) {
     List<Enemy> enemies = new Vector<>();
     int count = Math.max(1, (int) Math.round(
         config.baseCount() * (1. + config.countGrowth() * (wave - 1))));
-    double radius = config.spawnRadius()
-        + config.radiusGrowth() * (wave - 1);
+    float hp = (float) (config.hpBase() * (1. + config.hpGrowth() * (wave - 1)));
+    float damage = (float) (config.attackDamageBase()
+        * (1. + config.attackDamageGrowth() * (wave - 1)));
 
-    for (int i = 0; i < count; ++i) {
-      double angle = rng.nextDouble() * 2. * Math.PI;
-      double x = core.x + Math.cos(angle) * radius;
-      double y = core.y + Math.sin(angle) * radius;
-
-      enemies.add(new FlyingEnemy(firstId + i, x, y));
-    }
+    for (int i = 0; i < count; ++i)
+      enemies.add(new FlyingEnemy(firstId + i, 0., 0., hp, config.rad(),
+          config.velMax(), config.forceMax(), damage,
+          config.attackRange(), config.attackInterval()));
 
     return enemies;
   }
@@ -134,7 +120,7 @@ public class WaveSim implements Simulation {
 
   private void startWave() {
     List<Enemy> created = waveFactory.create(
-        world.wave(), rng, config, world.base().core().pos(), nextEnemyId);
+        world.wave(), rng, config, nextEnemyId);
 
     pending.clear();
     if (created != null)
@@ -149,8 +135,18 @@ public class WaveSim implements Simulation {
     Enemy enemy = pending.get(0);
     pending.swapRemove(0);
 
-    if (enemy != null)
+    if (enemy != null) {
+      Vec2D core = world.base().core().pos();
+      double radius = config.spawnRadius()
+          + config.radiusGrowth() * (world.wave() - 1);
+      double angle = rng.nextDouble() * 2. * Math.PI;
+
+      Vec2D pos = enemy.pos();
+      pos.x = core.x + Math.cos(angle) * radius;
+      pos.y = core.y + Math.sin(angle) * radius;
+
       world.addEnemy(enemy);
+    }
 
     spawnCooldown = config.spawnInterval();
   }

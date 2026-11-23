@@ -120,6 +120,7 @@ public abstract class EnemyAbs implements Enemy {
     return Vec2D.dist(pos, p) - rad;
   }
 
+  @Override
   public boolean inRange(Cells c) {
     return c != null && c.alive() && edgeDistance(c) <= attackRange;
   }
