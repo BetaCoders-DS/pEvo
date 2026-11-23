@@ -32,6 +32,7 @@ public final class EvolutionDemo {
   private static void verifyGenerationEvaluation() {
     TestSimulation compact = new TestSimulation(1000.0, 2);
     TestSimulation longer = new TestSimulation(2000.0, 1);
+    double expectedLength = compact.world().base().settledLength();
 
     GenerationEvaluation evaluation = new GenerationEvaluation(
         1,
@@ -82,9 +83,9 @@ public final class EvolutionDemo {
           "The compact base should win this scenario.");
     }
 
-    if (ranking[0].initialEdgeLength() != 1000.0) {
+    if (ranking[0].initialEdgeLength() != expectedLength) {
       throw new AssertionError(
-          "Undirected edges must be counted once.");
+          "Settled edge length must be measured after settling.");
     }
 
     SimulationResult[] parents = evaluation.selectParents(1);

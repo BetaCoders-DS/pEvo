@@ -7,6 +7,8 @@ import com.github.betacoders.collections.Vec2D;
 import com.github.betacoders.collections.Vector;
 
 public class World {
+  private static final int SETTLE_TICKS = 300;
+
   private final Base base;
   private final Vector<Enemy> enemies;
 
@@ -18,6 +20,9 @@ public class World {
   public World(Base base) {
     this.base = Objects.requireNonNull(base, "A base é obrigatória.");
     this.enemies = new Vector<>();
+
+    for (int i = 0; i < SETTLE_TICKS; ++i)
+      base.attractOnce();
   }
 
   public Base base() {

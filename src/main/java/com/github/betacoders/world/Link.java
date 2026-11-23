@@ -2,21 +2,18 @@ package com.github.betacoders.world;
 
 import com.github.betacoders.collections.Vec2D;
 
-/**
- * Link
- */
 public final class Link {
   private final Cells a;
   private final Cells b;
-  private final double length; // px
+  private final double genomeLength;
   private int load;
 
-  private final static double LOAD_COST_MULT = 10.;
+  private static final double LOAD_COST_MULT = 10.;
 
   public Link(Cells a, Cells b) {
     this.a = a;
     this.b = b;
-    this.length = Vec2D.dist(a.pos(), b.pos());
+    this.genomeLength = Vec2D.dist(a.pos(), b.pos());
     this.load = 0;
   }
 
@@ -28,12 +25,16 @@ public final class Link {
     return b;
   }
 
+  public double genomeLength() {
+    return genomeLength;
+  }
+
   public double length() {
-    return length;
+    return Vec2D.dist(a.pos(), b.pos());
   }
 
   public int cost() {
-    return Math.max(1, (int) Math.round(length + load * LOAD_COST_MULT));
+    return Math.max(1, (int) Math.round(length() + load * LOAD_COST_MULT));
   }
 
   public int load() {
@@ -47,6 +48,5 @@ public final class Link {
   public void leave() {
     if (load > 0)
       --load;
-
   }
 }

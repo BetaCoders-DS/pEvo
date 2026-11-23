@@ -66,7 +66,7 @@ public final class GenerationEvaluation {
         }
       }
 
-      double length = world.base().totalEdgeLength();
+      double length = world.base().settledLength();
 
       if (!Double.isFinite(length) || length < 0.0) {
         throw new IllegalArgumentException(

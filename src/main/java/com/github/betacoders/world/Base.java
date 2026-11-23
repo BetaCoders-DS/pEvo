@@ -13,6 +13,8 @@ import com.github.betacoders.collections.Vector;
  */
 public class Base {
   private static final double PACKET_SPEED = 4.;
+  private static final double EDGE_REST_LENGTH = 70.;
+  private static final double MAX_ATTRACTION_STEP = 1.;
 
   private final Graph<Cells, Link> graph;
   private Cells.Core core;
@@ -54,9 +56,46 @@ public class Base {
   private double sumEdgeLengths() {
     double sum = 0.;
     for (Link l : graph.edges())
+      sum += l.genomeLength();
+
+    return sum;
+  }
+
+  public double settledLength() {
+    double sum = 0.;
+    for (Link l : graph.edges())
       sum += l.length();
 
     return sum;
+  }
+
+  public void attractOnce() {
+    for (Link l : graph.edges())
+      attract(l);
+  }
+
+  private void attract(Link l) {
+    Cells a = l.a();
+    Cells b = l.b();
+    Vec2D pa = a.pos();
+    Vec2D pb = b.pos();
+
+    double dx = pb.x - pa.x;
+    double dy = pb.y - pa.y;
+    double dist = Math.hypot(dx, dy);
+    if (dist <= EDGE_REST_LENGTH || dist == 0.)
+      return;
+
+    double excess = dist - EDGE_REST_LENGTH;
+    double step = Math.min(excess, MAX_ATTRACTION_STEP) / dist;
+    double totalMass = a.mass() + b.mass();
+    double aShare = b.mass() / totalMass;
+    double bShare = a.mass() / totalMass;
+
+    pa.x += dx * step * aShare;
+    pa.y += dy * step * aShare;
+    pb.x -= dx * step * bShare;
+    pb.y -= dy * step * bShare;
   }
 
   public Graph<Cells, Link> graph() {
@@ -76,6 +115,7 @@ public class Base {
   }
 
   public boolean tick() {
+    attractOnce();
     pruneDeadCells();
     tickCells();
     dispatchAmmo();
