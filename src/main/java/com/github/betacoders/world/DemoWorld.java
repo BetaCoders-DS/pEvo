@@ -34,6 +34,13 @@ public final class DemoWorld {
   private final ArrayList<Cells.Extractor> extractors = new ArrayList<>();
   private final ArrayList<Cells.Turret> turrets = new ArrayList<>();
 
+   // Velocidade com que o pacote anda pelos links, em pixels por TICK
+  // (2.2 px/tick a 60 ticks por segundo = ~130 px/s).
+  private static final double PACKET_SPEED = 2.2;
+
+  // Para qual torre mandar a próxima munição (revezamento entre elas).
+  private int nextTurret;
+
   // O grafo é montado aqui e depois entregue à Base.
   private Graph<Cells, Link> graph;
   private Base base;
@@ -49,6 +56,7 @@ public final class DemoWorld {
   public void reset() {
     extractors.clear();
     turrets.clear();
+    nextTurret = 0;
 
     graph = new AdjacencyGraph<>();
     nextId = 0;
