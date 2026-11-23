@@ -276,6 +276,112 @@ public final class DemoWorld {
     }
   }
 
+    /** Faz aparecer um inimigo novo numa borda aleatória do mundo. */
+  private void spawnEnemies() {
+    ++spawnTimer;
+    if (spawnTimer < ENEMY_SPAWN_EVERY)
+      return; // ainda não é hora
+
+    spawnTimer = 0;
+
+    double x;
+    double y;
+    // Sorteia 0 a 3: cima, baixo, esquerda ou direita.
+    switch (rng.nextInt(4)) {
+      case 0 -> { // borda de cima
+        x = rng.nextDouble() * width;
+        y = 0;
+      }
+      case 1 -> { // borda de baixo
+        x = rng.nextDouble() * width;
+        y = height;
+      }
+      case 2 -> { // borda da esquerda
+        x = 0;
+        y = rng.nextDouble() * height;
+      }
+      default -> { // borda da direita
+        x = width;
+        y = rng.nextDouble() * height;
+      }
+    }
+
+    // 36 de vida (3 tiros de 12 matam) e velocidade de 0,65 px por tick
+    // (cerca de 38 px por segundo).
+    enemies.add(new Enemy(x, y, 36f, 0.65));
+  }
+
+  /** Move cada inimigo em linha reta até o Core. Se chegar, causa dano e some. */
+  private void moveEnemies() {
+    Cells.Core core = base.core();
+
+    Iterator<Enemy> it = enemies.iterator();
+    while (it.hasNext()) {
+      Enemy e = it.next();
+      Vec2D target = core.pos();
+      double d = Vec2D.dist(e.pos, target); // distância até o Core
+
+      // Chegou: bate no Core e desaparece.
+      if (d <= core.rad() + 6) {
+        core.damage(40f);
+        it.remove();
+        continue;
+      }
+
+      // Anda na direção do Core. (target - pos) / d é um vetor de tamanho 1
+      // apontando para o Core; multiplicamos pelo quanto ele anda neste tick.
+      // O Math.min impede de passar do Core.
+      double step = Math.min(e.speed, d);
+      e.pos.x += (target.x - e.pos.x) / d * step;
+      e.pos.y += (target.y - e.pos.y) / d * step;
+    }
+  }
+
+  /** Cada torre com munição atira no inimigo mais próximo dentro do alcance. */
+  private void fireTurrets() {
+    for (Cells.Turret t : turrets) {
+      // O tempo de espera entre tiros já foi diminuído no c.tick() do
+      // início do tick(). Aqui só perguntamos se ela já pode atirar.
+      if (!t.alive() || !t.canShoot())
+        continue; // sem munição ou ainda esperando
+
+      // Procura o inimigo mais próximo. Comparamos distâncias AO QUADRADO
+      // (distSq) porque evita calcular raiz quadrada, e a ordem é a mesma.
+      Enemy nearest = null;
+      double best = t.range() * t.range(); // só vale quem estiver no alcance
+      for (Enemy e : enemies) {
+        double d2 = Vec2D.distSq(t.pos(), e.pos);
+        if (d2 <= best) {
+          best = d2;
+          nearest = e;
+        }
+      }
+
+      // shoot() gasta 1 de munição e inicia o tempo de espera; devolve
+      // false se não conseguiu atirar.
+      if (nearest != null && t.shoot()) {
+        nearest.hp -= t.shotDamage();
+        shots.add(new Shot(t.pos(), nearest.pos));
+
+        if (nearest.hp <= 0) {
+          enemies.remove(nearest);
+          ++kills;
+        }
+      }
+    }
+  }
+
+  /** Diminui o tempo de vida dos traços de tiro e remove os que acabaram. */
+  private void ageShots() {
+    Iterator<Shot> it = shots.iterator();
+    while (it.hasNext()) {
+      Shot s = it.next();
+      --s.ttl;
+      if (s.ttl <= 0)
+        it.remove();
+    }
+  }
+
   //Getters
 
   /** A Base real do time. É daqui que o Renderer lê células, links e pacotes. */
