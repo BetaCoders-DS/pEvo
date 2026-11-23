@@ -198,14 +198,27 @@ public final class DemoWorld {
   /**
    * Avança a simulação UM tick.
    */
-  public void tick() {
+ public void tick() {
+    // Se o Core morreu, começa tudo de novo (só na demo; na simulação
+    // real a base cair significa o fim da avaliação).
+    if (!base.core().alive()) {
+      reset();
+      return;
+    }
+
+    ++ticks;
+
     // Cada célula avança um tick. Isso faz o Extractor produzir munição e
     // a Turret diminuir o tempo de espera entre tiros.
     for (Cells c : base.graph())
       c.tick();
 
-    sendPackets();
-    movePackets();
+    sendPackets(); // extratores mandam pacotes
+    movePackets(); // pacotes andam até as torres
+    spawnEnemies(); // aparecem inimigos novos de vez em quando
+    moveEnemies(); // inimigos andam até o Core
+    fireTurrets(); // torres atiram nos inimigos ao alcance
+    ageShots(); // os traços de tiro vão sumindo
   }
 
   /** Cada extrator que tiver munição manda um pacote para uma torre. */
