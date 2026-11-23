@@ -89,7 +89,8 @@ public abstract class Enemy {
     desired.x = tx - pos.x;
     desired.y = ty - pos.y;
     normalizeInPlace(desired);
-
+    desired.multiply(velMax);
+    applySteering();
   }
 
   protected void stop() {
