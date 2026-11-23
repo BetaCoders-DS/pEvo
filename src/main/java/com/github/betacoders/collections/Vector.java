@@ -133,8 +133,8 @@ public class Vector<T> implements List<T> {
     T rem = null;
     if (i != last)
       rem = set(i, get(last));
-    else
-      rem = pop();
+
+    rem = pop();
 
     return rem;
   }
