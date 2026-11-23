@@ -139,13 +139,20 @@ public final class Renderer {
     }
   }
 
-  /** TEMPORÁRIO: inimigos da demo, bolinhas vermelhas. */
+  /** TEMPORÁRIO: inimigos da demo, com uma barra de vida em cima. */
   private void drawEnemies(DemoWorld extras) {
-    g.stroke(10, 12, 18);
-    g.strokeWeight(1);
-    g.fill(220, 60, 70);
-    for (DemoWorld.Enemy e : extras.enemies())
-      g.ellipse((float) e.pos.x, (float) e.pos.y, 14, 14);
+    for (DemoWorld.Enemy e : extras.enemies()) {
+      float x = (float) e.pos.x;
+      float y = (float) e.pos.y;
+
+      g.stroke(10, 12, 18);
+      g.strokeWeight(1);
+      g.fill(220, 60, 70);
+      g.ellipse(x, y, 14, 14);
+
+      // Barra acima do inimigo: largura 16, proporcional à vida restante.
+      drawBar(x - 8, y - 15, 16, 3, e.hp / e.hpMax, 90, 220, 110);
+    }
   }
 
   /** TEMPORÁRIO: tiros da demo, um traço claro da torre até o inimigo. */
