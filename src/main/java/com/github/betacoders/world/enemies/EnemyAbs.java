@@ -2,11 +2,18 @@ package com.github.betacoders.world.enemies;
 
 import com.github.betacoders.collections.Vec2D;
 import com.github.betacoders.world.Base;
-import com.github.betacoders.world.Enemy;
 import com.github.betacoders.world.Cells;
+import com.github.betacoders.world.Enemy;
+
 
 public abstract class EnemyAbs implements Enemy {
   protected static final double DRAG = 0.02;
+
+  /**
+   * Fracao do alcance em que o inimigo para de se aproximar.
+   * Margem para drag/overshoot nao o tirarem do alcance.
+   */
+  protected static final double HOLD_FRACTION = 0.8;
 
   protected final int id;
   protected final Vec2D pos;
@@ -21,9 +28,9 @@ public abstract class EnemyAbs implements Enemy {
   protected float hp;
 
   protected final float attackDamage;
-  protected final double attackRange;
-  protected final int attackInterval;
-  protected int cooldown;
+  protected final double attackRange; // px, borda a borda
+  protected final int attackInterval; // ticks
+  protected int cooldown; // ticks
 
   protected Cells target;
 
@@ -34,6 +41,9 @@ public abstract class EnemyAbs implements Enemy {
   protected EnemyAbs(int id, double x, double y, float hpMax, double mass, double rad,
       double velMax, double forceMax, float attackDamage, double attackRange,
       int attackInterval) {
+    if (rad < 0 || attackRange < 0 || attackInterval < 1)
+      throw new IllegalArgumentException("Parametros de inimigo invalidos.");
+
     this.id = id;
     this.pos = new Vec2D(x, y);
     this.hpMax = hpMax;
@@ -50,6 +60,12 @@ public abstract class EnemyAbs implements Enemy {
 
   public abstract boolean flying();
 
+  /**
+   * Subclasse deve chamar tickCooldown() todo tick.
+   *
+   * @return false se o inimigo deve ser removido do mundo
+   */
+  @Override
   public abstract boolean tick(Base base);
 
   @Override
@@ -57,6 +73,7 @@ public abstract class EnemyAbs implements Enemy {
     return id;
   }
 
+  @Override
   public Vec2D pos() {
     return pos;
   }
@@ -81,6 +98,7 @@ public abstract class EnemyAbs implements Enemy {
     return target;
   }
 
+  @Override
   public boolean alive() {
     return hp > 0f;
   }
@@ -90,9 +108,34 @@ public abstract class EnemyAbs implements Enemy {
     return attackRange;
   }
 
+  /**
+   * Distancia entre a borda deste inimigo e a borda da celula.
+   * Negativa se estiverem sobrepostos.
+   */
+  public double edgeDistance(Cells c) {
+    return Vec2D.dist(pos, c.pos()) - rad - c.rad();
+  }
+
+  public double distanceFrom(Vec2D p) {
+    return Vec2D.dist(pos, p) - rad;
+  }
+
+  public boolean inRange(Cells c) {
+    return c != null && c.alive() && edgeDistance(c) <= attackRange;
+  }
+
+  protected boolean inHoldRange(Cells c) {
+    return c != null && c.alive() && edgeDistance(c) <= attackRange * HOLD_FRACTION;
+  }
+
+  protected boolean targetValid() {
+    return target != null && target.alive();
+  }
+
+
   @Override
   public boolean canAttack() {
-    return cooldown <= 0;
+    return alive() && cooldown <= 0;
   }
 
   @Override
@@ -104,12 +147,14 @@ public abstract class EnemyAbs implements Enemy {
     return attackDamage;
   }
 
+  @Override
   public void damage(float amount) {
     hp = Math.max(0f, hp - amount);
   }
 
-  public double distanceFrom(Vec2D p) {
-    return Vec2D.dist(pos, p) - rad;
+  protected void tickCooldown() {
+    if (cooldown > 0)
+      --cooldown;
   }
 
   protected void seek(double tx, double ty) {
@@ -146,25 +191,6 @@ public abstract class EnemyAbs implements Enemy {
 
     acc.x = 0;
     acc.y = 0;
-  }
-
-  protected void tickCooldown() {
-    if (cooldown > 0)
-      --cooldown;
-  }
-
-  protected boolean inRange(Cells c) {
-    return c != null && c.alive()
-        && Vec2D.dist(c.pos(), pos) - c.rad() <= attackRange;
-  }
-
-  protected boolean tryAttack() {
-    if (cooldown > 0 || !inRange(target))
-      return false;
-
-    target.damage(attackDamage);
-    cooldown = attackInterval;
-    return true;
   }
 
   private static void normalizeInPlace(Vec2D v) {
