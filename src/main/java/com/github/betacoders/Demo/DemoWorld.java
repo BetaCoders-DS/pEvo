@@ -1,14 +1,17 @@
-package com.github.betacoders.world;
+package com.github.betacoders.Demo;
 
 import com.github.betacoders.collections.AdjacencyGraph;
 import com.github.betacoders.collections.Graph;
 import com.github.betacoders.collections.List;
-import com.github.betacoders.world.Base;
 import com.github.betacoders.collections.Vec2D; // posição (x, y)
-import com.github.betacoders.world.Cells; // Core, Relay, Extractor, Turret
-import com.github.betacoders.world.Link; // ligação entre duas células
-import com.github.betacoders.world.Packet; // pacote de munição que anda pelo grafo
-
+import com.github.betacoders.world.Base;
+import com.github.betacoders.world.Cells;
+import com.github.betacoders.world.Link;
+import com.github.betacoders.world.Packet;
+import com.github.betacoders.world.Cells.Core;
+import com.github.betacoders.world.Cells.Extractor;
+import com.github.betacoders.world.Cells.Relay;
+import com.github.betacoders.world.Cells.Turret;
 
 import java.util.ArrayList;
 import java.util.Iterator; // permite remover itens de uma lista enquanto percorre
@@ -388,7 +391,7 @@ public final class DemoWorld {
   public Base base() {
     return base;
   }
-  
+
     public ArrayList<Enemy> enemies() {
     return enemies;
   }
