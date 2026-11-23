@@ -1,58 +1,53 @@
 package com.github.betacoders.world.enemies;
 
 import com.github.betacoders.collections.Vec2D;
-import com.github.betacoders.world.World;
-
-/**
- * Enemy
- *
- * Base dos inimigos. Sem Processing: só Vec2D e Math, para rodar headless.
- * Unidades: px, px/s, g, s.
- *
- * Usa só o que o Vec2D atual tem: campos x/y, multiply, divide.
- * Operações extras (normalizar, limitar, somar escalado) são helpers privados aqui.
- */
+import com.github.betacoders.world.Base;
+import com.github.betacoders.world.Cells;
 
 public abstract class Enemy {
-  protected static final double DRAG = 1.0; 
+  protected static final double DRAG = 0.02;
+
   protected final Vec2D pos;
   protected final Vec2D vel = new Vec2D();
 
-  protected final double mass; // g
-  protected final double velMax; // px/s
-  protected final double forceMax; // g*px/s^2
+  protected final double mass;
+  protected final double rad;
+  protected final double velMax;
+  protected final double forceMax;
 
   protected final float hpMax;
   protected float hp;
 
   protected final float attackDamage;
-  protected final double attackRange; // px
-  protected final double attackInterval; // s
-  protected double cooldown; // s
+  protected final double attackRange;
+  protected final int attackInterval;
+  protected int cooldown;
 
-  protected Damageable target;
+  protected Cells target;
 
   private final Vec2D desired = new Vec2D();
   private final Vec2D steer = new Vec2D();
   private final Vec2D acc = new Vec2D();
 
-  protected Enemy(double x, double y, float hpMax, double mass, double velMax,
-      double forceMax, float attackDamage, double attackRange, double attackInterval) {
+  protected Enemy(double x, double y, float hpMax, double mass, double rad,
+      double velMax, double forceMax, float attackDamage, double attackRange,
+      int attackInterval) {
     this.pos = new Vec2D(x, y);
     this.hpMax = hpMax;
     this.hp = hpMax;
     this.mass = mass;
+    this.rad = rad;
     this.velMax = velMax;
     this.forceMax = forceMax;
     this.attackDamage = attackDamage;
     this.attackRange = attackRange;
     this.attackInterval = attackInterval;
-    this.cooldown = 0.;
+    this.cooldown = 0;
   }
 
   public abstract boolean flying();
-  public abstract void update(World world, double dt);
 
+  public abstract boolean tick(Base base);
 
   public Vec2D pos() {
     return pos;
@@ -60,6 +55,10 @@ public abstract class Enemy {
 
   public Vec2D vel() {
     return vel;
+  }
+
+  public double rad() {
+    return rad;
   }
 
   public float hp() {
@@ -70,6 +69,10 @@ public abstract class Enemy {
     return hpMax;
   }
 
+  public Cells target() {
+    return target;
+  }
+
   public boolean alive() {
     return hp > 0f;
   }
@@ -78,16 +81,15 @@ public abstract class Enemy {
     hp = Math.max(0f, hp - amount);
   }
 
-  public Damageable target() {
-    return target;
+  public double distanceFrom(Vec2D p) {
+    return Vec2D.dist(pos, p) - rad;
   }
 
   protected void seek(double tx, double ty) {
     desired.x = tx - pos.x;
     desired.y = ty - pos.y;
     normalizeInPlace(desired);
-    desired.multiply(velMax);
-    applySteering();
+
   }
 
   protected void stop() {
@@ -104,32 +106,32 @@ public abstract class Enemy {
     acc.y = steer.y / mass;
   }
 
-  protected void integrate(double dt) {
-    vel.x += acc.x * dt;
-    vel.y += acc.y * dt;
+  protected void integrate() {
+    vel.x += acc.x;
+    vel.y += acc.y;
 
-    vel.multiply(Math.max(0., 1. - DRAG * dt));
+    vel.multiply(1. - DRAG);
     limitInPlace(vel, velMax);
 
-    pos.x += vel.x * dt;
-    pos.y += vel.y * dt;
+    pos.x += vel.x;
+    pos.y += vel.y;
 
     acc.x = 0;
     acc.y = 0;
   }
 
-  protected void tickCooldown(double dt) {
+  protected void tickCooldown() {
     if (cooldown > 0)
-      cooldown = Math.max(0., cooldown - dt);
+      --cooldown;
   }
 
-  protected boolean inRange(Damageable t) {
-    return t != null && t.alive() && t.distanceFrom(pos) <= attackRange;
+  protected boolean inRange(Cells c) {
+    return c != null && c.alive()
+        && Vec2D.dist(c.pos(), pos) - c.rad() <= attackRange;
   }
 
   protected boolean tryAttack() {
-    if (cooldown > 0 || !inRange(target))
-      return false;
+    if (cooldown > 0 || !inRange(target)) return false;
 
     target.damage(attackDamage);
     cooldown = attackInterval;
@@ -138,8 +140,7 @@ public abstract class Enemy {
 
   private static void normalizeInPlace(Vec2D v) {
     double len = Math.sqrt(v.x * v.x + v.y * v.y);
-    if (len > 0)
-      v.divide(len);
+    if (len > 0) v.divide(len);
   }
 
   private static void limitInPlace(Vec2D v, double max) {
