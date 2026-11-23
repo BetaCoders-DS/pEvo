@@ -79,7 +79,7 @@ public final class Packet {
 
       if (hop + 1 >= path.size()) {
         done = true;
-        if (to instanceof Cells.Turret turret && turret.alive())
+        if (path.get(path.size() - 1) instanceof Cells.Turret turret && turret.alive())
           turret.receiveAmmo();
 
         return true;
