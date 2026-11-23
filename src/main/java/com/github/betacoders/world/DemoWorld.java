@@ -75,3 +75,72 @@ public final class DemoWorld {
     // Centro do mundo, usado como referência para posicionar tudo.
     double cx = width / 2;
     double cy = height / 2;
+
+    // O Core fica no meio.
+    Cells.Core core = add(new Cells.Core(nextId++, cx, cy));
+
+    // Relays: ficam em volta do Core e distribuem a munição.
+    Cells r1 = add(new Cells.Relay(nextId++, cx - 80, cy - 50));
+    Cells r2 = add(new Cells.Relay(nextId++, cx + 80, cy - 50));
+    Cells r3 = add(new Cells.Relay(nextId++, cx - 80, cy + 50));
+    Cells r4 = add(new Cells.Relay(nextId++, cx + 80, cy + 50));
+
+    // Extractors: produzem munição. Parâmetros: id, x, y, capacidade (5)
+    // e intervalo em TICKS entre cada munição produzida (50).
+    Cells.Extractor e1 = add(new Cells.Extractor(nextId++, cx, cy - 120, 5, 50));
+    Cells.Extractor e2 = add(new Cells.Extractor(nextId++, cx, cy + 120, 5, 50));
+    extractors.add(e1);
+    extractors.add(e2);
+
+    // Turrets: atiram nos inimigos. Parâmetros: id, x, y, capacidade de
+    // munição (6), alcance em px (170), dano por tiro (12) e intervalo
+    // entre tiros em TICKS (60, ou seja, 1 tiro por segundo).
+    Cells.Turret t1 = add(new Cells.Turret(nextId++, cx - 180, cy - 100, 6, 170., 12f, 60));
+    Cells.Turret t2 = add(new Cells.Turret(nextId++, cx + 180, cy - 100, 6, 170., 12f, 60));
+    Cells.Turret t3 = add(new Cells.Turret(nextId++, cx - 180, cy + 100, 6, 170., 12f, 60));
+    Cells.Turret t4 = add(new Cells.Turret(nextId++, cx + 180, cy + 100, 6, 170., 12f, 60));
+    turrets.add(t1);
+    turrets.add(t2);
+    turrets.add(t3);
+    turrets.add(t4);
+
+    // Core <-> Relays
+    connect(core, r1);
+    connect(core, r2);
+    connect(core, r3);
+    connect(core, r4);
+
+    // Relays entre si
+    connect(r1, r2);
+    connect(r3, r4);
+    connect(r1, r3);
+    connect(r2, r4);
+
+    // Extractors -> Relays
+    connect(e1, r1);
+    connect(e1, r2);
+    connect(e2, r3);
+    connect(e2, r4);
+
+    // Turrets -> Relays
+    connect(t1, r1);
+    connect(t2, r2);
+    connect(t3, r3);
+    connect(t4, r4);
+  }
+
+  //Getters
+
+  /** A Base real do time. É daqui que o Renderer lê células, links e pacotes. */
+  public Base base() {
+    return base;
+  }
+
+  public double width() {
+    return width;
+  }
+
+  public double height() {
+    return height;
+  }
+}
