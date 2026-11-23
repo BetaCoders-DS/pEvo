@@ -4,6 +4,7 @@ import java.util.Objects;
 import java.util.Random;
 
 import com.github.betacoders.collections.Vec2D;
+import com.github.betacoders.world.enemies.FlyingEnemy;
 
 public class WaveSim implements Simulation {
   public record WaveConfig(
@@ -64,6 +65,24 @@ public class WaveSim implements Simulation {
   private int spawnCooldown;
   private int interWaveCooldown;
   private boolean waveActive;
+
+  public WaveSim(World world, long seed) {
+    this(world, seed, WaveConfig.DEFAULT);
+  }
+
+  public WaveSim(World world, long seed, WaveConfig config) {
+    this(world, seed, WaveSim::createFlyingEnemy, config);
+  }
+
+  private static Enemy createFlyingEnemy(
+      int id, double x, double y, int wave, Random rng, WaveConfig config) {
+    float hp = (float) (config.hpBase() * (1. + config.hpGrowth() * (wave - 1)));
+    float damage = (float) (config.attackDamageBase()
+        * (1. + config.attackDamageGrowth() * (wave - 1)));
+
+    return new FlyingEnemy(id, x, y, hp, config.rad(), config.velMax(),
+        config.forceMax(), damage, config.attackRange(), config.attackInterval());
+  }
 
   public WaveSim(World world, long seed, EnemyFactory enemyFactory, WaveConfig config) {
     this.world = Objects.requireNonNull(world, "World required.");
