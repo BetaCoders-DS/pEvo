@@ -79,16 +79,38 @@ public final class Renderer {
     g.line((float) a.x, (float) a.y, (float) b.x, (float) b.y);
   }
 
-  /** Desenha cada célula como um círculo. */
+    /** Desenha cada célula como um círculo, com alcance, munição e vida. */
   private void drawCells(Base base) {
     for (Cells c : base.graph()) {
-      // ellipse() recebe o DIÂMETRO, e a célula guarda o RAIO (rad()).
-      float d = (float) (c.rad() * 2);
+      float x = (float) c.pos().x;
+      float y = (float) c.pos().y;
+      float d = (float) (c.rad() * 2); // diâmetro
 
-      g.stroke(10, 12, 18); // contorno escuro
+      // O "instanceof Cells.Turret t" confere o tipo E já cria a variável t
+      // com esse tipo, para podermos chamar métodos exclusivos da torre.
+      // Alcance da torre: círculo grande e bem transparente (alpha 18),
+      // desenhado ANTES da célula para ficar por trás.
+      if (c instanceof Cells.Turret t) {
+        g.noStroke();
+        g.fill(255, 120, 80, 18);
+        g.ellipse(x, y, (float) (t.range() * 2), (float) (t.range() * 2));
+      }
+
+      // A célula em si.
+      g.stroke(10, 12, 18);
       g.strokeWeight(2);
-      setCellColor(c); // cor de preenchimento conforme o tipo
-      g.ellipse((float) c.pos().x, (float) c.pos().y, d, d);
+      setCellColor(c);
+      g.ellipse(x, y, d, d);
+
+      // Munição guardada (só torres e extratores têm).
+      if (c instanceof Cells.Turret t)
+        drawAmmo(x, y, d, t.stored(), t.cap());
+      else if (c instanceof Cells.Extractor e)
+        drawAmmo(x, y, d, e.stored(), e.cap());
+
+      // Barra de vida acima da célula, só aparece se ela estiver machucada.
+      if (c.hp() < c.hpMax())
+        drawBar(x - d / 2, y - d / 2 - 9, d, 4, c.hp() / c.hpMax(), 90, 220, 110);
     }
   }
 
