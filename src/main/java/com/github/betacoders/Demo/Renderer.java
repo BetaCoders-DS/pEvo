@@ -35,27 +35,35 @@ public final class Renderer {
    * x e y representam o canto superior esquerdo do painel.
    * panelW e panelH representam o tamanho disponível para desenhar.
    */
-  public void draw(World world, float x, float y, float panelW, float panelH) {
+/**
+ * Desenha uma única base ocupando a janela inteira.
+ *
+ * Cada janela recebe uma World independente.
+ * Portanto, este método nunca desenha várias bases ao mesmo tempo.
+ */
+public void draw(World world) {
 
-    // Calcula uma escala para o mundo caber dentro do painel.
-    // Math.min evita que o desenho ultrapasse os limites.
+    // Calcula a escala necessária para o mundo caber na janela.
+    // O Math.min garante que o desenho não ultrapasse os limites.
     float scale = Math.min(
-        panelW / (float) worldW,
-        panelH / (float) worldH
+        g.width / (float) worldW,
+        g.height / (float) worldH
     );
 
     // Guarda as configurações atuais de transformação do Processing.
     g.pushMatrix();
 
-    // Centraliza o mundo dentro do painel.
-    float offsetX = (panelW - (float) worldW * scale) / 2;
-    float offsetY = (panelH - (float) worldH * scale) / 2;
+    // Calcula os espaços laterais para centralizar o mundo na janela.
+    float offsetX = (g.width - (float) worldW * scale) / 2;
+    float offsetY = (g.height - (float) worldH * scale) / 2;
 
-    g.translate(x + offsetX, y + offsetY);
+    // Posiciona o mundo no centro da janela.
+    g.translate(offsetX, offsetY);
 
     // Redimensiona tudo que será desenhado a partir daqui.
     g.scale(scale);
 
+    // Desenha os elementos da base.
     // A ordem importa: os elementos desenhados depois ficam por cima.
     drawGrid();
     drawLinks(world);
@@ -63,9 +71,9 @@ public final class Renderer {
     drawPackets(world);
     drawEnemies(world);
 
-    // Restaura as transformações anteriores.
+    // Restaura as transformações anteriores do Processing.
     g.popMatrix();
-  }
+}
 
   /**
    * Desenha a grade de fundo.
