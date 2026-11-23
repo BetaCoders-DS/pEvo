@@ -166,4 +166,34 @@ public final class Renderer {
       g.line((float) s.from.x, (float) s.from.y, (float) s.to.x, (float) s.to.y);
     }
   }
+
+
+  private void drawAmmo(float x, float y, float d, int stored, int cap) {
+    float size = 5; // diâmetro de cada bolinha
+
+    // Ponto inicial da fileira, calculado para ela ficar centralizada.
+    float startX = x - (cap * (size + 2) - 2) / 2;
+
+    g.noStroke();
+    for (int i = 0; i < cap; ++i) {
+      if (i < stored)
+        g.fill(255, 225, 90); // cheia
+      else
+        g.fill(60, 64, 78); // vazia
+      g.ellipse(startX + i * (size + 2) + size / 2, y + d / 2 + 8, size, size);
+    }
+  }
+
+  /**
+   * Barra de vida genérica: um retângulo escuro de fundo e outro colorido
+   * por cima, com largura proporcional à fração cheia.
+   */
+  private void drawBar(float x, float y, float w, float h, float frac, int r, int gr, int b) {
+    g.noStroke();
+    g.fill(40, 20, 24); // fundo da barra
+    g.rect(x, y, w, h);
+    g.fill(r, gr, b); // parte cheia
+    // Math.max/min garantem que frac fique entre 0 e 1.
+    g.rect(x, y, w * Math.max(0f, Math.min(1f, frac)), h);
+  }
 }
