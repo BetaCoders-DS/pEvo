@@ -2,6 +2,7 @@ package com.github.betacoders.world;
 
 import java.util.Objects;
 
+import com.github.betacoders.collections.Graph;
 import com.github.betacoders.collections.List;
 import com.github.betacoders.collections.Vec2D;
 import com.github.betacoders.collections.Vector;
@@ -18,15 +19,29 @@ public class World {
   private boolean over = false;
 
   public World(Base base) {
-    this.base = Objects.requireNonNull(base, "A base é obrigatória.");
+    this.base = Objects.requireNonNull(
+        base, "A base é obrigatória.");
+
     this.enemies = new Vector<>();
 
-    for (int i = 0; i < SETTLE_TICKS; ++i)
+    for (int i = 0; i < SETTLE_TICKS; i++)
       base.attractOnce();
   }
 
   public Base base() {
     return base;
+  }
+
+  public Graph<Cells, Link> graph() {
+    return base.graph();
+  }
+
+  public int cellCount() {
+    return graph().size();
+  }
+
+  public double totalEdgeLength() {
+    return base.settledLength();
   }
 
   public List<Enemy> enemies() {
@@ -41,27 +56,31 @@ public class World {
   }
 
   public boolean removeEnemy(Enemy enemy) {
-    int i = enemies.indexOf(enemy);
-    if (i == -1)
+    int index = enemies.indexOf(enemy);
+
+    if (index == -1)
       return false;
 
-    enemies.swapRemove(i);
+    enemies.swapRemove(index);
     return true;
   }
 
   public boolean tick() {
-    if (over)
+    if (over()) {
+      over = true;
       return false;
+    }
 
-    ++tick;
+    tick++;
 
     if (!base.tick()) {
       over = true;
       return false;
     }
 
-    for (int i = enemies.size() - 1; i >= 0; --i) {
+    for (int i = enemies.size() - 1; i >= 0; i--) {
       Enemy enemy = enemies.get(i);
+
       if (!enemy.tick(base) || !enemy.alive()) {
         enemies.swapRemove(i);
         continue;
@@ -70,11 +89,16 @@ public class World {
       enemyAttack(enemy);
     }
 
+    if (!base.core().alive()) {
+      over = true;
+      return false;
+    }
+
     for (Cells cell : base.graph())
       if (cell instanceof Cells.Turret turret && turret.alive())
         turretAttack(turret);
 
-    for (int i = enemies.size() - 1; i >= 0; --i)
+    for (int i = enemies.size() - 1; i >= 0; i--)
       if (!enemies.get(i).alive())
         enemies.swapRemove(i);
 
@@ -90,36 +114,43 @@ public class World {
     if (!turret.canShoot())
       return;
 
-    Enemy target = nearestEnemy(turret.pos(), turret.range());
+    Enemy target = nearestEnemy(
+        turret.pos(), turret.range());
+
     if (target == null || !turret.shoot())
       return;
 
     target.damage(turret.shotDamage());
+
     if (!target.alive())
       recordEnemyKilled();
   }
 
   private void enemyAttack(Enemy enemy) {
-    if (!enemy.canAttack() || enemy.attackRange() <= 0.)
+    if (!enemy.canAttack() || enemy.attackRange() <= 0.0)
       return;
 
-    Cells target = nearestCell(enemy.pos(), enemy.attackRange());
+    Cells target = nearestCell(
+        enemy.pos(), enemy.attackRange());
+
     if (target != null)
       target.damage(enemy.attack());
   }
 
   private Enemy nearestEnemy(Vec2D from, double range) {
     Enemy best = null;
-    double bestDist = range * range;
+    double bestDistance = range * range;
 
-    for (int i = 0; i < enemies.size(); ++i) {
+    for (int i = 0; i < enemies.size(); i++) {
       Enemy enemy = enemies.get(i);
+
       if (!enemy.alive())
         continue;
 
-      double dist = Vec2D.distSq(from, enemy.pos());
-      if (dist <= bestDist) {
-        bestDist = dist;
+      double distance = Vec2D.distSq(from, enemy.pos());
+
+      if (distance <= bestDistance) {
+        bestDistance = distance;
         best = enemy;
       }
     }
@@ -129,15 +160,16 @@ public class World {
 
   private Cells nearestCell(Vec2D from, double range) {
     Cells best = null;
-    double bestDist = range * range;
+    double bestDistance = range * range;
 
     for (Cells cell : base.graph()) {
       if (!cell.alive())
         continue;
 
-      double dist = Vec2D.distSq(from, cell.pos());
-      if (dist <= bestDist) {
-        bestDist = dist;
+      double distance = Vec2D.distSq(from, cell.pos());
+
+      if (distance <= bestDistance) {
+        bestDistance = distance;
         best = cell;
       }
     }
@@ -162,16 +194,16 @@ public class World {
   }
 
   public boolean over() {
-    return over;
+    return over || !base.core().alive();
   }
 
   public void recordEnemyKilled() {
-    if (!over)
-      ++enemiesKilled;
+    if (!over())
+      enemiesKilled++;
   }
 
   public void completeWave() {
-    if (!over)
-      ++wave;
+    if (!over())
+      wave++;
   }
 }
