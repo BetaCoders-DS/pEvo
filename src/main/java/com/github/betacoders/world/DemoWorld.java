@@ -107,6 +107,11 @@ public final class DemoWorld {
     extractors.clear();
     turrets.clear();
     nextTurret = 0;
+    enemies.clear();
+    shots.clear();
+    kills = 0;
+    ticks = 0;
+    spawnTimer = 0;
 
     graph = new AdjacencyGraph<>();
     nextId = 0;
