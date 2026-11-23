@@ -38,3 +38,40 @@ public final class DemoWorld {
   private Graph<Cells, Link> graph;
   private Base base;
   private int nextId; // contador para dar um id único a cada célula
+
+  public DemoWorld(double width, double height) {
+    this.width = width;
+    this.height = height;
+    reset();
+  }
+
+  /** Apaga tudo e monta uma Base nova do zero. */
+  public void reset() {
+    extractors.clear();
+    turrets.clear();
+
+    graph = new AdjacencyGraph<>();
+    nextId = 0;
+    build();
+
+    // A Base descobre sozinha qual é o Core e cria o pathfinder (A*)
+    // a partir do grafo. Por isso o grafo precisa estar PRONTO antes.
+    base = new Base(graph, SEED);
+  }
+
+  /** Cria a célula e registra como vértice no grafo. */
+  private <T extends Cells> T add(T cell) {
+    graph.addVertex(cell);
+    return cell;
+  }
+
+  /** Liga duas células: cria o Link e registra a aresta no grafo. */
+  private void connect(Cells a, Cells b) {
+    graph.addEdge(a, b, new Link(a, b));
+  }
+
+  /** Monta a base de teste: 1 Core, 4 Relays, 2 Extractors e 4 Turrets. */
+  private void build() {
+    // Centro do mundo, usado como referência para posicionar tudo.
+    double cx = width / 2;
+    double cy = height / 2;
