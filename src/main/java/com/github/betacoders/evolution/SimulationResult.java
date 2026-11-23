@@ -8,6 +8,13 @@ public record SimulationResult(
     long survivalTicks,
     double initialEdgeLength) {
 
+  private static final double WAVE_WEIGHT = 10000.0;
+  private static final double EDGE_WEIGHT = 800.0;
+  private static final double EDGE_REF = 1000.0;
+  private static final double SURVIVAL_WEIGHT = 60.0;
+  private static final double TICKS_PER_SECOND = 30.0;
+  private static final double KILL_WEIGHT = 20.0;
+
   public SimulationResult {
     if (generation < 0 || individualId < 0) {
       throw new IllegalArgumentException(
@@ -33,15 +40,13 @@ public record SimulationResult(
   }
 
   public double score() {
-    double killBonus = 600.0 * (enemiesKilled / (enemiesKilled + 10.0));
+    double edgeTerm = EDGE_WEIGHT * EDGE_REF / (initialEdgeLength + EDGE_REF);
+    double survivalTerm = SURVIVAL_WEIGHT * Math.log1p(survivalTicks / TICKS_PER_SECOND);
+    double killTerm = KILL_WEIGHT * Math.log1p(enemiesKilled);
 
-    double survivalBonus = 250.0 * (survivalTicks / (survivalTicks + 60.0));
-
-    double compactnessBonus = 150.0 / (1.0 + initialEdgeLength / 1000.0);
-
-    return 1000.0 * wavesCompleted
-        + killBonus
-        + survivalBonus
-        + compactnessBonus;
+    return WAVE_WEIGHT * wavesCompleted
+        + edgeTerm
+        + survivalTerm
+        + killTerm;
   }
 }
