@@ -137,6 +137,77 @@ public final class DemoWorld {
     connect(t4, r4);
   }
 
+
+   // ---- Simulação ----
+
+  /**
+   * Avança a simulação UM tick.
+   */
+  public void tick() {
+    // Cada célula avança um tick. Isso faz o Extractor produzir munição e
+    // a Turret diminuir o tempo de espera entre tiros.
+    for (Cells c : base.graph())
+      c.tick();
+
+    sendPackets();
+    movePackets();
+  }
+
+  /** Cada extrator que tiver munição manda um pacote para uma torre. */
+  private void sendPackets() {
+    for (Cells.Extractor ex : extractors) {
+      if (ex.stored() <= 0)
+        continue; // ainda não produziu nada
+
+      Cells.Turret target = nextTurretNeedingAmmo();
+      if (target == null)
+        continue; // todas as torres já estão cheias
+
+      // O A* da Base devolve a lista de células do extrator até a torre.
+      List<Cells> path = base.pathfinder().findPath(ex, target);
+
+      // path.size() < 2 significa que não existe caminho. Só gastamos a
+      // munição do extrator (consume) se o pacote realmente puder sair.
+      if (path.size() >= 2 && ex.consume())
+        base.packets().add(new Packet(path, PACKET_SPEED, base.graph()));
+    }
+  }
+
+  /**
+   * Escolhe a próxima torre que ainda aceita munição, em revezamento.
+   * Devolve null se todas estiverem cheias.
+   */
+  private Cells.Turret nextTurretNeedingAmmo() {
+    for (int i = 0; i < turrets.size(); ++i) {
+      // O "% size" faz a contagem voltar ao início da lista.
+      Cells.Turret t = turrets.get((nextTurret + i) % turrets.size());
+
+      if (t.alive() && t.stored() < t.cap()) {
+        nextTurret = (nextTurret + i + 1) % turrets.size();
+        return t;
+      }
+    }
+    return null;
+  }
+
+  /** Faz cada pacote andar um tick e remove os que já chegaram. */
+  private void movePackets() {
+    List<Packet> packets = base.packets();
+
+    // Percorremos de TRÁS PARA FRENTE porque remover um item da lista
+    // desloca os que vêm depois dele; de trás para frente isso não
+    // atrapalha os que ainda faltam visitar.
+    for (int i = packets.size() - 1; i >= 0; --i) {
+      Packet p = packets.get(i);
+      p.tick(base.graph());
+
+      // done() fica true quando o pacote chegou (e entregou a munição
+      // para a torre) ou quando o caminho foi interrompido.
+      if (p.done())
+        packets.remove(i);
+    }
+  }
+
   //Getters
 
   /** A Base real do time. É daqui que o Renderer lê células, links e pacotes. */
