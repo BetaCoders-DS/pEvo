@@ -9,11 +9,13 @@ public interface Graph<V, E> extends Iterable<V> {
 
   boolean containsEdge(V a, V b);
 
-  E getEdge(V a, V b);
+  E edge(V a, V b);
 
-  Set<V> vertices();
+  List<V> vertices();
 
-  Set<V> neighbors(V v);
+  List<E> edges();
+
+  List<V> neighbors(V v);
 
   void forEachNeighbor(V v, NeighborConsumer<V, E> consumer);
 

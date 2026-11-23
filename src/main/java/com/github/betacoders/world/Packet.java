@@ -23,7 +23,7 @@ public final class Packet {
     this.done = path == null || path.size() < 2;
 
     if (!this.done) {
-      this.currentLink = graph.getEdge(path.get(0), path.get(1));
+      this.currentLink = graph.edge(path.get(0), path.get(1));
 
       if (this.currentLink != null)
         this.currentLink.enter();
@@ -88,7 +88,7 @@ public final class Packet {
       Cells nextFrom = path.get(hop);
       Cells nextTo = path.get(hop + 1);
 
-      currentLink = graph.getEdge(nextFrom, nextTo);
+      currentLink = graph.edge(nextFrom, nextTo);
       if (currentLink == null || !nextTo.alive()) {
         done = true;
         return true;
