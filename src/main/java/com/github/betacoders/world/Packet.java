@@ -56,9 +56,9 @@ public final class Packet {
     return new Vec2D(x, y);
   }
 
-  public void step(Graph<Cells, Link> graph) {
+  public boolean tick(Graph<Cells, Link> graph) {
     if (done)
-      return;
+      return false;
 
     Cells from = path.get(hop);
     Cells to = path.get(hop + 1);
@@ -66,7 +66,7 @@ public final class Packet {
     if (!from.alive() || !to.alive() || currentLink == null) {
       releaseLink();
       done = true;
-      return;
+      return true;
     }
 
     double len = currentLink.length();
@@ -82,7 +82,7 @@ public final class Packet {
         if (to instanceof Cells.Turret turret && turret.alive())
           turret.receiveAmmo();
 
-        return;
+        return true;
       }
 
       Cells nextFrom = path.get(hop);
@@ -91,10 +91,12 @@ public final class Packet {
       currentLink = graph.getEdge(nextFrom, nextTo);
       if (currentLink == null || !nextTo.alive()) {
         done = true;
-        return;
+        return true;
       }
       currentLink.enter();
     }
+
+    return true;
   }
 
   private void releaseLink() {
