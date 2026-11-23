@@ -25,23 +25,13 @@ public class Sketch extends PApplet {
   @Override
   public void setup() {
     super.setup();
-    // Quantos fps o draw() deve rodar.
     frameRate(60);
-
-    // Cria o mundo com o mesmo tamanho da janela.
     world = new DemoWorld(1000, 700);
-
-    // Teste: confirma no console que a Base foi montada.
-    // Esperado: 11 células (1 Core + 4 Relays + 2 Extractors + 4 Turrets)
-    // e 16 links (arestas do grafo).
-    System.out.println("Células: " + world.base().graph().size());
-    System.out.println("Links: " + world.base().graph().edgeCount());
   }
 
   @Override
   public void draw() {
      super.draw();
-    // Pinta o fundo inteiro (R, G, B). A cada frame para apagar o desenho do frame anterior.
     // Avança a simulação 1 tick (um frame = um tick).
     world.tick();
 
