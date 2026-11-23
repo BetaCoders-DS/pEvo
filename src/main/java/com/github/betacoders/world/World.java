@@ -127,11 +127,10 @@ public class World {
   }
 
   private void enemyAttack(Enemy enemy) {
-    if (!enemy.canAttack() || enemy.attackRange() <= 0.0)
+    if (!enemy.canAttack())
       return;
 
-    Cells target = nearestCell(
-        enemy.pos(), enemy.attackRange());
+    Cells target = nearestCell(enemy);
 
     if (target != null)
       target.damage(enemy.attack());
@@ -158,15 +157,15 @@ public class World {
     return best;
   }
 
-  private Cells nearestCell(Vec2D from, double range) {
+  private Cells nearestCell(Enemy enemy) {
     Cells best = null;
-    double bestDistance = range * range;
+    double bestDistance = Double.POSITIVE_INFINITY;
 
     for (Cells cell : base.graph()) {
-      if (!cell.alive())
+      if (!enemy.inRange(cell))
         continue;
 
-      double distance = Vec2D.distSq(from, cell.pos());
+      double distance = Vec2D.distSq(enemy.pos(), cell.pos());
 
       if (distance <= bestDistance) {
         bestDistance = distance;

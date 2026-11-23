@@ -17,7 +17,15 @@ public final class FlyingEnemy extends EnemyAbs{
     private int retargetTimer;
 
     public FlyingEnemy(int id, double x, double y) {
-        super(id, x, y, HP_MAX, MASS, RAD, VEL_MAX, FORCE_MAX, ATTACK_DAMAGE, ATTACK_RANGE, ATTACK_INTERVAL);
+        this(id, x, y, HP_MAX, RAD, VEL_MAX, FORCE_MAX,
+            ATTACK_DAMAGE, ATTACK_RANGE, ATTACK_INTERVAL);
+    }
+
+    public FlyingEnemy(int id, double x, double y, float hpMax, double rad,
+            double velMax, double forceMax, float attackDamage, double attackRange,
+            int attackInterval) {
+        super(id, x, y, hpMax, MASS, rad, velMax, forceMax,
+            attackDamage, attackRange, attackInterval);
         this.retargetTimer = Math.floorMod(id, RETARGET_INTERVAL);
     }
 

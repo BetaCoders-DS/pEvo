@@ -2,8 +2,8 @@
 package com.github.betacoders.sketch;
 
 import com.github.betacoders.Demo.Renderer;
-import com.github.betacoders.evolution.EvolutionManager;
-import com.github.betacoders.world.Simulation;
+import com.github.betacoders.EvoEngine;
+import com.github.betacoders.world.World;
 
 import processing.core.PApplet;
 
@@ -19,7 +19,7 @@ import processing.core.PApplet;
 public class Sketch extends PApplet {
 
     // Controlador compartilhado por todas as janelas.
-    private final EvolutionManager manager;
+    private final EvoEngine engine;
 
     // Identifica qual indivíduo esta janela representa.
     private final int individualIndex;
@@ -30,9 +30,9 @@ public class Sketch extends PApplet {
     // Guarda a última geração exibida no título.
     private int displayedGeneration = -1;
 
-    public Sketch(EvolutionManager manager, int individualIndex) {
+    public Sketch(EvoEngine engine, int individualIndex) {
 
-        this.manager = manager;
+        this.engine = engine;
         this.individualIndex = individualIndex;
     }
 
@@ -49,7 +49,7 @@ public class Sketch extends PApplet {
         frameRate(60);
 
         // Cria o Renderer associado especificamente a esta janela.
-        renderer = new Renderer(this, 1000, 700);
+        renderer = new Renderer(this, engine.config().width(), engine.config().height());
 
         // Define o título inicial da janela.
         surface.setTitle(
@@ -66,21 +66,20 @@ public class Sketch extends PApplet {
          * O synchronized impede que uma janela desenhe
          * enquanto outra estiver atualizando a população.
          */
-        synchronized (manager) {
+        synchronized (engine) {
 
             // Somente a primeira janela avança a simulação.
             // Assim, a população inteira recebe apenas um tick
             // por quadro, em vez de um tick para cada janela.
             if (individualIndex == 0) {
-                manager.step();
+                engine.step();
             }
 
-            // Busca a simulação correspondente a esta janela.
-            Simulation simulation =
-                manager.simulationAt(individualIndex);
+            // Busca o mundo atual, inclusive após a troca de geração.
+            World world = engine.worldAt(individualIndex);
 
             // Atualiza o título somente quando a geração mudar.
-            int currentGeneration = manager.generation();
+            int currentGeneration = engine.generation();
 
             if (displayedGeneration != currentGeneration) {
 
@@ -96,7 +95,7 @@ public class Sketch extends PApplet {
             background(18, 20, 28);
 
             // Desenha somente a World desta janela.
-            renderer.draw(simulation.world());
+            renderer.draw(world);
         }
     }
 }

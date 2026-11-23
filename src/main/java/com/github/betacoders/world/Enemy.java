@@ -13,6 +13,12 @@ public interface Enemy {
 
   double attackRange();
 
+  /** Permite que cada tipo de inimigo use a geometria do seu movimento. */
+  default boolean inRange(Cells cell) {
+    return cell != null && cell.alive()
+        && Vec2D.dist(pos(), cell.pos()) <= attackRange();
+  }
+
   boolean canAttack();
 
   float attack();
