@@ -1,14 +1,15 @@
 package com.github.betacoders.sketch;
 
 import com.github.betacoders.Demo.DemoWorld;
-
+import com.github.betacoders.Demo.Renderer;
 import processing.core.PApplet;
 
 /**
  * Janela principal do programa.
  */
 public class Sketch extends PApplet {
-  private DemoWorld world;
+  private DemoWorld world; // o que acontece (a simulação)
+  private Renderer renderer; // como é desenhado
 
   @Override
   public void settings() {
@@ -19,21 +20,18 @@ public class Sketch extends PApplet {
   public void setup() {
     frameRate(60);
     world = new DemoWorld(1000, 700);
+    // O Renderer precisa receber "this" (esta janela) para poder desenhar
+    // nela, e o tamanho do mundo para desenhar a grade.
+    renderer = new Renderer(this, 1000, 700);
   }
 
   @Override
   public void draw() {
-    // Avança a simulação 1 tick (um frame = um tick).
-      world.tick();
+    // 1) Atualiza a simulação (1 tick).
+    world.tick();
 
-    // Teste: uma vez por segundo, mostra a vida da base, quantos inimigos
-    // morreram e quantos estão em campo. "mortos" deve subir com o tempo
-    // e a vida da base deve cair devagar.
-    if (frameCount % 60 == 0)
-      System.out.println("Vida da base: " + world.base().core().hp()
-          + " | mortos: " + world.kills()
-          + " | inimigos: " + world.enemies().size());
-
+    // 2) Limpa a tela e desenha o estado atual por cima.
     background(18, 20, 28);
+    renderer.draw(world.base(), world);
   }
-}
+}  
