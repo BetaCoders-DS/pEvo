@@ -42,6 +42,14 @@ public class Sketch extends PApplet {
   public void draw() {
      super.draw();
     // Pinta o fundo inteiro (R, G, B). A cada frame para apagar o desenho do frame anterior.
+    // Avança a simulação 1 tick (um frame = um tick).
+    world.tick();
+
+    // Teste: uma vez por segundo (a cada 60 frames) mostra no console
+    // quantos pacotes de munição estão viajando. O número deve variar.
+    if (frameCount % 60 == 0)
+      System.out.println("Pacotes em andamento: " + world.base().packets().size());
+
     background(18, 20, 28);
   }
 }
