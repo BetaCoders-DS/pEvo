@@ -34,6 +34,45 @@ public final class DemoWorld {
   private final ArrayList<Cells.Extractor> extractors = new ArrayList<>();
   private final ArrayList<Cells.Turret> turrets = new ArrayList<>();
 
+
+  // --- INIMIGOS E TIROS
+
+   /** Um inimigo: anda em linha reta até o Core. */
+  public static final class Enemy {
+    public final Vec2D pos; // posição atual (muda a cada tick)
+    public float hp; // vida atual
+    public final float hpMax; // vida máxima (usada na barra de vida)
+    private final double speed; // velocidade em px por tick
+
+    Enemy(double x, double y, float hp, double speed) {
+      this.pos = new Vec2D(x, y);
+      this.hp = hp;
+      this.hpMax = hp;
+      this.speed = speed;
+    }
+  }
+
+  /** Traço de um tiro. Existe só para o Renderer desenhar um flash curto. */
+  public static final class Shot {
+    /** Quantos ticks o traço dura na tela. */
+    public static final int LIFETIME = 7;
+
+    public final Vec2D from; // de onde saiu (a torre)
+    public final Vec2D to; // onde acertou (o inimigo)
+    public int ttl; // "time to live": ticks até o traço sumir
+
+    Shot(Vec2D from, Vec2D to) {
+      // copy() porque o inimigo continua andando e a posição dele muda;
+      // o traço precisa guardar o ponto exato em que o tiro acertou.
+      this.from = from.copy();
+      this.to = to.copy();
+      this.ttl = LIFETIME;
+    }
+  }
+
+  // Um inimigo novo aparece a cada tantos ticks (84 ticks = 1,4 s).
+  private static final int ENEMY_SPAWN_EVERY = 84;
+
    // Velocidade com que o pacote anda pelos links, em pixels por TICK
   // (2.2 px/tick a 60 ticks por segundo = ~130 px/s).
   private static final double PACKET_SPEED = 2.2;
