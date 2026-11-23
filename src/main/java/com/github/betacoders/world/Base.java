@@ -1,7 +1,6 @@
 package com.github.betacoders.world;
 
 import java.util.Objects;
-import java.util.Random;
 
 import com.github.betacoders.algo.AStarPathfinder;
 import com.github.betacoders.collections.Graph;
@@ -19,7 +18,6 @@ public class Base {
   private Cells.Core core;
   private final AStarPathfinder<Cells, Link> pathfinder;
   private final Vector<Packet> packets;
-  private final Random rng;
 
   private int wave = 1;
   private boolean over = false;
@@ -28,11 +26,9 @@ public class Base {
 
   private final double totalEdgeLength;
 
-  public Base(Graph<Cells, Link> graph, long seed) {
+  public Base(Graph<Cells, Link> graph) {
     this.graph = Objects.requireNonNull(
         graph, "O grafo é obrigatório.");
-
-    this.rng = new Random(seed);
 
     this.pathfinder = new AStarPathfinder<>(
         graph,
