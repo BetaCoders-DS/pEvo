@@ -80,6 +80,17 @@ public final class DemoWorld {
   // Para qual torre mandar a próxima munição (revezamento entre elas).
   private int nextTurret;
 
+  // O Random usa a MESMA semente da Base: toda execução gera os mesmos
+  // inimigos, nos mesmos lugares. Isso deixa os testes repetíveis.
+  private final Random rng = new Random(SEED);
+
+  private final ArrayList<Enemy> enemies = new ArrayList<>();
+  private final ArrayList<Shot> shots = new ArrayList<>();
+  private int kills; // inimigos mortos
+  private int ticks; // ticks de simulação
+  private int spawnTimer; // conta os ticks até o próximo inimigo
+
+
   // O grafo é montado aqui e depois entregue à Base.
   private Graph<Cells, Link> graph;
   private Base base;
