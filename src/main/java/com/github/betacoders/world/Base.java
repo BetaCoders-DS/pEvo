@@ -1,5 +1,6 @@
 package com.github.betacoders.world;
 
+import java.util.Objects;
 import java.util.Random;
 
 import com.github.betacoders.algo.AStarPathfinder;
@@ -28,19 +29,34 @@ public class Base {
   private double totalEdgeLength;
 
   public Base(Graph<Cells, Link> graph, long seed) {
-    this.graph = graph;
+    this.graph = Objects.requireNonNull(
+        graph, "O grafo é obrigatório.");
+
     this.rng = new Random(seed);
 
-    this.pathfinder = new AStarPathfinder<>(graph, Link::cost,
+    this.pathfinder = new AStarPathfinder<>(
+        graph,
+        Link::cost,
         (a, b) -> (int) Math.hypot(
             a.pos().x - b.pos().x,
             a.pos().y - b.pos().y));
 
-    this.packets = new Vector<>();
-
     for (Cells cell : graph)
-      if (cell instanceof Cells.Core c)
-        this.core = c;
+      if (cell instanceof Cells.Core c) {
+        if (core != null) {
+          throw new IllegalArgumentException(
+              "A base deve ter apenas um núcleo.");
+        }
+
+        core = c;
+        break;
+      }
+
+    if (core == null)
+      throw new IllegalArgumentException(
+          "A base precisa de um núcleo.");
+
+    this.packets = new Vector<>();
 
     this.totalEdgeLength = sumEdgeLengths();
   }
@@ -73,12 +89,8 @@ public class Base {
     return wave;
   }
 
-  public boolean over() {
-    return over;
-  }
-
-  public double totalEdgeLength() {
-    return totalEdgeLength;
+  public int wavesCompleted() {
+    return wave - 1;
   }
 
   public boolean tick() {
@@ -183,11 +195,30 @@ public class Base {
     }
   }
 
+  public boolean over() {
+    return over;
+  }
+
   public int ticks() {
     return tick;
   }
 
   public int enemiesKilled() {
     return enemiesKilled;
+  }
+
+  public double totalEdgeLength() {
+    return totalEdgeLength;
+  }
+
+  public void recordEnemyKilled() {
+    if (!over())
+      enemiesKilled++;
+  }
+
+  public void completeWave() {
+    if (!over()) {
+      wave++;
+    }
   }
 }
