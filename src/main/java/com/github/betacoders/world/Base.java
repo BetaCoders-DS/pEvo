@@ -22,6 +22,8 @@ public class Base {
   private int tick = 0;
   private int enemiesKilled = 0;
 
+  private double totalEdgeLength;
+
   public Base(Graph<Cells, Link> graph, long seed) {
     this.graph = graph;
     this.rng = new Random(seed);
@@ -36,6 +38,16 @@ public class Base {
     for (Cells cell : graph)
       if (cell instanceof Cells.Core c)
         this.core = c;
+
+    this.totalEdgeLength = sumEdgeLengths();
+  }
+
+  private double sumEdgeLengths() {
+    double sum = 0.;
+    for (Link l : graph.edges())
+      sum += l.length();
+
+    return sum;
   }
 
   public Graph<Cells, Link> graph() {
@@ -63,7 +75,7 @@ public class Base {
   }
 
   public double totalEdgeLength() {
-    return 0;
+    return totalEdgeLength;
   }
 
   public boolean tick() {
