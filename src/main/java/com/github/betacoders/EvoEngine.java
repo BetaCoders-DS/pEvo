@@ -7,6 +7,7 @@ import com.github.betacoders.evolution.EvolutionExperiment;
 import com.github.betacoders.evolution.SimulationResult;
 import com.github.betacoders.world.WaveSim;
 import com.github.betacoders.world.WaveSim.WaveConfig;
+import com.github.betacoders.world.enemies.EnemyWaveFact;
 import com.github.betacoders.world.World;
 
 /**
@@ -14,73 +15,71 @@ import com.github.betacoders.world.World;
  * A interface exibe os mundos sem controlar suas regras de evolução.
  */
 public final class EvoEngine {
-    private final EvolutionConfig config;
-    private final EvolutionExperiment experiment;
+  private final EvolutionConfig config;
+  private final EvolutionExperiment experiment;
 
-    public EvoEngine(EvolutionConfig config) {
-        this(config, WaveConfig.DEFAULT);
+  public EvoEngine(EvolutionConfig config) {
+    this(config, WaveConfig.DEFAULT);
+  }
+
+  public EvoEngine(EvolutionConfig config, WaveConfig waveConfig) {
+    this.config = Objects.requireNonNull(config);
+    Objects.requireNonNull(waveConfig);
+
+    // Mundos independentes recebem a mesma seed de cenário para
+    // comparar os genomas sob as mesmas ondas em todas as gerações.
+    experiment = new EvolutionExperiment(
+        config,
+        (world, scenarioSeed) -> new WaveSim(world, scenarioSeed, new EnemyWaveFact(), waveConfig));
+  }
+
+  /** Chamado uma vez por quadro, somente pela janela principal. */
+  public synchronized void step() {
+    experiment.step();
+  }
+
+  public synchronized World worldAt(int index) {
+    if (index < 0 || index >= populationSize()) {
+      throw new IndexOutOfBoundsException(
+          "Índice de indivíduo inválido: " + index);
     }
 
-    public EvoEngine(EvolutionConfig config, WaveConfig waveConfig) {
-        this.config = Objects.requireNonNull(config);
-        Objects.requireNonNull(waveConfig);
+    return experiment.simulations()[index].world();
+  }
 
-        // Mundos independentes recebem a mesma seed de cenário para
-        // comparar os genomas sob as mesmas ondas em todas as gerações.
-        experiment = new EvolutionExperiment(
-            config,
-            (world, scenarioSeed) -> new WaveSim(world, scenarioSeed, waveConfig)
-        );
-    }
+  public EvolutionConfig config() {
+    return config;
+  }
 
-    /** Avança toda a população uma vez por quadro, independentemente da visualização. */
-    public synchronized void step() {
-        experiment.step();
-    }
+  public int populationSize() {
+    return config.populationSize();
+  }
 
-    public synchronized World worldAt(int index) {
-        if (index < 0 || index >= populationSize()) {
-            throw new IndexOutOfBoundsException(
-                "Índice de indivíduo inválido: " + index
-            );
-        }
+  public synchronized int generation() {
+    return experiment.generation();
+  }
 
-        return experiment.simulations()[index].world();
-    }
+  public synchronized boolean generationFinished() {
+    return experiment.generationFinished();
+  }
 
-    public EvolutionConfig config() {
-        return config;
-    }
+  public synchronized SimulationResult[] previousRanking() {
+    return experiment.previousRanking();
+  }
 
-    public int populationSize() {
-        return config.populationSize();
-    }
+  public synchronized long seed() {
+    return experiment.seed();
+  }
 
-    public synchronized int generation() {
-        return experiment.generation();
-    }
+  public synchronized long scenarioSeed() {
+    return experiment.scenarioSeed();
+  }
 
-    public synchronized boolean generationFinished() {
-        return experiment.generationFinished();
-    }
+  public synchronized void restart() {
+    experiment.restart();
+  }
 
-    public synchronized SimulationResult[] previousRanking() {
-        return experiment.previousRanking();
-    }
-
-    public synchronized long seed() {
-        return experiment.seed();
-    }
-
-    public synchronized long scenarioSeed() {
-        return experiment.scenarioSeed();
-    }
-
-    public synchronized void restart() {
-        experiment.restart();
-    }
-
-    public synchronized void restart(long seed) {
-        experiment.restart(seed);
-    }
+  public synchronized void restart(long seed) {
+    experiment.restart(seed);
+  }
 }
