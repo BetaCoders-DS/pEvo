@@ -1,44 +1,38 @@
 package com.github.betacoders.sketch;
 
-import com.github.betacoders.world.DemoWorld;
+import com.github.betacoders.Demo.DemoWorld;
+
 import processing.core.PApplet;
 
 /**
  * Janela principal do programa.
- *
- * O Processing chama estes três métodos sozinho:
- *   settings() -> uma vez, antes de abrir a janela
- *   setup()    -> uma vez, depois que a janela abriu
- *   draw()     -> repetidamente, a cada frame (60)
  */
 public class Sketch extends PApplet {
-  // O mundo que será mostrado (por enquanto, o de demonstração).
   private DemoWorld world;
 
   @Override
   public void settings() {
-    super.settings();
-    // Tamanho da janela em pixels (largura, altura).
     size(1000, 700);
   }
 
   @Override
   public void setup() {
-    super.setup();
     frameRate(60);
     world = new DemoWorld(1000, 700);
   }
 
   @Override
   public void draw() {
-     super.draw();
     // Avança a simulação 1 tick (um frame = um tick).
-    world.tick();
+      world.tick();
 
-    // Teste: uma vez por segundo (a cada 60 frames) mostra no console
-    // quantos pacotes de munição estão viajando. O número deve variar.
+    // Teste: uma vez por segundo, mostra a vida da base, quantos inimigos
+    // morreram e quantos estão em campo. "mortos" deve subir com o tempo
+    // e a vida da base deve cair devagar.
     if (frameCount % 60 == 0)
-      System.out.println("Pacotes em andamento: " + world.base().packets().size());
+      System.out.println("Vida da base: " + world.base().core().hp()
+          + " | mortos: " + world.kills()
+          + " | inimigos: " + world.enemies().size());
 
     background(18, 20, 28);
   }
