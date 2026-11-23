@@ -9,8 +9,7 @@ import processing.core.PApplet;
 /**
  * App
  *
- * Inicializa o experimento evolutivo e abre
- * uma janela independente para cada indivíduo.
+ * Inicializa o experimento evolutivo e abre a população em uma única janela.
  */
 public class App {
 
@@ -22,18 +21,6 @@ public class App {
         // Cria um único controlador para toda a população.
         EvoEngine engine = new EvoEngine(config);
 
-        // Abre uma janela para cada indivíduo da população.
-        for (int i = 0; i < engine.populationSize(); i++) {
-
-            // Cada janela recebe o mesmo controlador,
-            // mas possui um índice diferente.
-            Sketch sketch = new Sketch(engine, i);
-
-            // Abre uma nova janela independente do Processing.
-            PApplet.runSketch(
-                new String[] { "Base " + (i + 1) },
-                sketch
-            );
-        }
+        PApplet.runSketch(new String[] { "pEvo" }, new Sketch(engine));
     }
 }

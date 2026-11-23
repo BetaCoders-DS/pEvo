@@ -29,51 +29,34 @@ public final class Renderer {
     this.worldH = worldH;
   }
 
-  /**
-   * Desenha um World dentro de uma área específica da janela.
-   *
-   * x e y representam o canto superior esquerdo do painel.
-   * panelW e panelH representam o tamanho disponível para desenhar.
-   */
-/**
- * Desenha uma única base ocupando a janela inteira.
- *
- * Cada janela recebe uma World independente.
- * Portanto, este método nunca desenha várias bases ao mesmo tempo.
- */
-public void draw(World world) {
+  public void draw(World world) {
+    draw(world, 0, 0, g.width, g.height);
+  }
 
-    // Calcula a escala necessária para o mundo caber na janela.
-    // O Math.min garante que o desenho não ultrapasse os limites.
-    float scale = Math.min(
-        g.width / (float) worldW,
-        g.height / (float) worldH
-    );
+  /** Desenha um mundo na área do painel, preservando a proporção e recortando as bordas. */
+  public void draw(World world, float x, float y, float panelW, float panelH) {
+    if (panelW <= 0 || panelH <= 0)
+      return;
 
-    // Guarda as configurações atuais de transformação do Processing.
+    float scale = Math.min(panelW / (float) worldW, panelH / (float) worldH);
+    g.pushStyle();
     g.pushMatrix();
-
-    // Calcula os espaços laterais para centralizar o mundo na janela.
-    float offsetX = (g.width - (float) worldW * scale) / 2;
-    float offsetY = (g.height - (float) worldH * scale) / 2;
-
-    // Posiciona o mundo no centro da janela.
-    g.translate(offsetX, offsetY);
-
-    // Redimensiona tudo que será desenhado a partir daqui.
-    g.scale(scale);
-
-    // Desenha os elementos da base.
-    // A ordem importa: os elementos desenhados depois ficam por cima.
-    drawGrid();
-    drawLinks(world);
-    drawCells(world);
-    drawPackets(world);
-    drawEnemies(world);
-
-    // Restaura as transformações anteriores do Processing.
-    g.popMatrix();
-}
+    g.clip(x, y, panelW, panelH);
+    try {
+      g.translate(x + (panelW - (float) worldW * scale) / 2,
+          y + (panelH - (float) worldH * scale) / 2);
+      g.scale(scale);
+      drawGrid();
+      drawLinks(world);
+      drawCells(world);
+      drawPackets(world);
+      drawEnemies(world);
+    } finally {
+      g.popMatrix();
+      g.noClip();
+      g.popStyle();
+    }
+  }
 
   /**
    * Desenha a grade de fundo.

@@ -11,7 +11,7 @@ import com.github.betacoders.world.World;
 
 /**
  * Une a evolução da população aos mundos e às ondas de inimigos.
- * As janelas compartilham este controlador e apenas exibem um mundo cada.
+ * A interface exibe os mundos sem controlar suas regras de evolução.
  */
 public final class EvoEngine {
     private final EvolutionConfig config;
@@ -33,7 +33,7 @@ public final class EvoEngine {
         );
     }
 
-    /** Chamado uma vez por quadro, somente pela janela principal. */
+    /** Avança toda a população uma vez por quadro, independentemente da visualização. */
     public synchronized void step() {
         experiment.step();
     }
