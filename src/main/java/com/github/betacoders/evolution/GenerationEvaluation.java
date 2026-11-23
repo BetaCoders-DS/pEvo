@@ -1,184 +1,234 @@
 package com.github.betacoders.evolution;
 
-import java.util.Arrays;
 import java.util.Objects;
 
+import com.github.betacoders.collections.Graph;
+import com.github.betacoders.collections.HashSet;
+import com.github.betacoders.collections.LinkedList;
+import com.github.betacoders.collections.Set;
+import com.github.betacoders.world.Cells;
+import com.github.betacoders.world.Link;
 import com.github.betacoders.world.Simulation;
 import com.github.betacoders.world.World;
 
 public final class GenerationEvaluation {
-  private final int generation;
-  private final Simulation[] simulations;
-  private final World[] worlds;
-  private final double[] initialEdgeLengths;
-  private final SimulationResult[] results;
+    private final int generation;
+    private final Simulation[] simulations;
+    private final World[] worlds;
+    private final double[] initialLengths;
+    private final int[] initialCounts;
+    private final SimulationResult[] results;
 
-  private int defeatsRegistered;
+    private int defeatsRegistered;
 
-  public GenerationEvaluation(
-      int generation,
-      Simulation[] simulations) {
+    public GenerationEvaluation(
+            int generation,
+            Simulation[] simulations) {
 
-    if (generation < 0) {
-      throw new IllegalArgumentException(
-          "Generation must not be negative.");
-    }
-
-    Objects.requireNonNull(
-        simulations, "Simulations are required.");
-
-    if (simulations.length == 0) {
-      throw new IllegalArgumentException(
-          "Population must not be empty.");
-    }
-
-    this.generation = generation;
-    this.simulations = simulations.clone();
-    this.worlds = new World[simulations.length];
-    this.initialEdgeLengths = new double[simulations.length];
-    this.results = new SimulationResult[simulations.length];
-
-    for (int i = 0; i < simulations.length; i++) {
-      Simulation simulation = Objects.requireNonNull(
-          this.simulations[i], "Simulation must not be null.");
-
-      World world = Objects.requireNonNull(
-          simulation.world(), "Simulation must provide a world.");
-
-      if (world.over()
-          || world.ticks() != 0
-          || world.enemiesKilled() != 0
-          || world.wavesCompleted() != 0) {
-        throw new IllegalArgumentException(
-            "Generation requires fresh simulations.");
-      }
-
-      if (world.base() == null) {
-        throw new IllegalArgumentException(
-            "World must provide a base.");
-      }
-
-      for (int j = 0; j < i; j++) {
-        if (worlds[j] == world
-            || worlds[j].base() == world.base()) {
-          throw new IllegalArgumentException(
-              "Individuals must use separate bases and graphs.");
+        if (generation < 0) {
+            throw new IllegalArgumentException(
+                "Generation must not be negative."
+            );
         }
-      }
 
-      double length = world.base().settledLength();
+        Objects.requireNonNull(simulations);
 
-      if (!Double.isFinite(length) || length < 0.0) {
-        throw new IllegalArgumentException(
-            "Initial edge length is invalid.");
-      }
-
-      worlds[i] = world;
-      initialEdgeLengths[i] = length;
-    }
-  }
-
-  public void step() {
-    if (allDead()) {
-      return;
-    }
-
-    for (int i = 0; i < simulations.length; i++) {
-      if (results[i] != null) {
-        continue;
-      }
-
-      ensureSameWorld(i);
-
-      World world = worlds[i];
-
-      if (!world.over()) {
-        int previousTicks = world.ticks();
-
-        simulations[i].tick();
-
-        ensureSameWorld(i);
-
-        if (world.ticks() != previousTicks + 1) {
-          throw new IllegalStateException(
-              "Simulation must advance exactly one world tick.");
+        if (simulations.length == 0) {
+            throw new IllegalArgumentException(
+                "Population must not be empty."
+            );
         }
-      }
 
-      if (world.over()) {
-        results[i] = new SimulationResult(
-            generation,
-            i,
-            world.wavesCompleted(),
-            world.enemiesKilled(),
-            world.ticks(),
-            initialEdgeLengths[i]);
+        this.generation = generation;
+        this.simulations = simulations.clone();
 
-        defeatsRegistered++;
-      }
-    }
-  }
+        worlds = new World[simulations.length];
+        initialLengths = new double[simulations.length];
+        initialCounts = new int[simulations.length];
+        results = new SimulationResult[simulations.length];
 
-  private void ensureSameWorld(int index) {
-    World current = simulations[index].world();
-    if (current != worlds[index]
-        || current.base() != worlds[index].base()) {
-      throw new IllegalStateException(
-          "Simulation replaced its world during evaluation.");
-    }
-  }
+        Set<World> uniqueWorlds = new HashSet<>();
 
-  public boolean allDead() {
-    return defeatsRegistered == simulations.length;
-  }
+        Set<Graph<Cells, Link>> uniqueGraphs =
+            new HashSet<>();
 
-  public int defeatsRegistered() {
-    return defeatsRegistered;
-  }
+        Set<Cells> uniqueCells = new HashSet<>();
 
-  public int populationSize() {
-    return simulations.length;
-  }
+        for (int i = 0; i < simulations.length; i++) {
+            Simulation simulation =
+                Objects.requireNonNull(this.simulations[i]);
 
-  public SimulationResult[] ranking() {
-    if (!allDead()) {
-      throw new IllegalStateException(
-          "All bases must be defeated before ranking.");
-    }
+            World world =
+                Objects.requireNonNull(simulation.world());
 
-    SimulationResult[] ordered = Arrays.copyOf(results, results.length);
+            if (world.over()
+                    || world.ticks() != 0
+                    || world.enemiesKilled() != 0
+                    || world.wavesCompleted() != 0) {
+                throw new IllegalArgumentException(
+                    "Fresh worlds are required."
+                );
+            }
 
-    Arrays.sort(ordered, GenerationEvaluation::compareResults);
+            if (!uniqueWorlds.add(world)
+                    || !uniqueGraphs.add(world.graph())) {
+                throw new IllegalArgumentException(
+                    "Worlds and graphs must be independent."
+                );
+            }
 
-    return ordered;
-  }
+            for (Cells cell : world.graph()) {
+                if (!uniqueCells.add(cell)) {
+                    throw new IllegalArgumentException(
+                        "Worlds must not share cells."
+                    );
+                }
+            }
 
-  public SimulationResult[] selectParents(int count) {
-    if (count <= 0 || count > simulations.length) {
-      throw new IllegalArgumentException(
-          "Parent count must be within population bounds.");
-    }
+            double length = world.totalEdgeLength();
 
-    return Arrays.copyOf(ranking(), count);
-  }
+            if (!Double.isFinite(length) || length < 0) {
+                throw new IllegalArgumentException(
+                    "Invalid initial edge length."
+                );
+            }
 
-  private static int compareResults(
-      SimulationResult a,
-      SimulationResult b) {
-
-    int comparison = Integer.compare(
-        b.wavesCompleted(), a.wavesCompleted());
-
-    if (comparison != 0) {
-      return comparison;
+            worlds[i] = world;
+            initialLengths[i] = length;
+            initialCounts[i] = world.cellCount();
+        }
     }
 
-    comparison = Double.compare(b.score(), a.score());
+    public void step() {
+        for (int i = 0; i < simulations.length; i++) {
+            if (results[i] != null) {
+                continue;
+            }
 
-    if (comparison != 0) {
-      return comparison;
+            ensureSameWorld(i);
+
+            World world = worlds[i];
+
+            if (!world.over()) {
+                int previousTicks = world.ticks();
+
+                simulations[i].tick();
+
+                ensureSameWorld(i);
+
+                if (world.ticks() != previousTicks + 1) {
+                    throw new IllegalStateException(
+                        "Each step must advance one world tick."
+                    );
+                }
+            }
+
+            if (world.over()) {
+                results[i] = new SimulationResult(
+                    generation,
+                    i,
+                    world.wavesCompleted(),
+                    world.enemiesKilled(),
+                    world.ticks(),
+                    initialLengths[i],
+                    initialCounts[i]
+                );
+
+                defeatsRegistered++;
+            }
+        }
     }
 
-    return Integer.compare(a.individualId(), b.individualId());
-  }
+    private void ensureSameWorld(int index) {
+        if (simulations[index].world() != worlds[index]) {
+            throw new IllegalStateException(
+                "World changed during evaluation."
+            );
+        }
+    }
+
+    public boolean allDead() {
+        return defeatsRegistered == simulations.length;
+    }
+
+    public int defeatsRegistered() {
+        return defeatsRegistered;
+    }
+
+    public int populationSize() {
+        return simulations.length;
+    }
+
+    public SimulationResult[] ranking() {
+        if (!allDead()) {
+            throw new IllegalStateException(
+                "Ranking requires all worlds to finish."
+            );
+        }
+
+        LinkedList<SimulationResult> ordered =
+            new LinkedList<>();
+
+        for (SimulationResult result : results) {
+            ordered.addLast(result);
+        }
+
+        ordered.sort(
+            GenerationEvaluation::compareResults
+        );
+
+        SimulationResult[] ranking =
+            new SimulationResult[results.length];
+
+        int index = 0;
+
+        for (SimulationResult result : ordered) {
+            ranking[index++] = result;
+        }
+
+        return ranking;
+    }
+
+    public SimulationResult[] selectParents(int count) {
+        if (count <= 0 || count > simulations.length) {
+            throw new IllegalArgumentException(
+                "Invalid parent count."
+            );
+        }
+
+        SimulationResult[] selected =
+            new SimulationResult[count];
+
+        System.arraycopy(
+            ranking(), 0, selected, 0, count
+        );
+
+        return selected;
+    }
+
+    private static int compareResults(
+            SimulationResult a,
+            SimulationResult b) {
+
+        int comparison = Integer.compare(
+            b.wavesCompleted(),
+            a.wavesCompleted()
+        );
+
+        if (comparison != 0) {
+            return comparison;
+        }
+
+        comparison = Double.compare(
+            b.score(),
+            a.score()
+        );
+
+        return comparison != 0
+            ? comparison
+            : Integer.compare(
+                a.individualId(),
+                b.individualId()
+            );
+    }
 }
