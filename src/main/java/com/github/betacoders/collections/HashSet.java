@@ -3,12 +3,19 @@ package com.github.betacoders.collections;
 import java.util.Iterator;
 
 public class HashSet<E> implements Set<E> {
-  private static final Object DUMMY = new Object();
-  private final Map<E, Object> map = new HashMap<>();
+  private final Map<E, Object> map;
+
+  public HashSet() {
+    map = new HashMap<>();
+  }
+
+  public HashSet(int cap) {
+    map = new HashMap<>(cap);
+  }
 
   @Override
   public boolean add(E e) {
-    return map.put(e, DUMMY) == null;
+    return map.put(e, e) == null;
   }
 
   @Override

@@ -128,14 +128,16 @@ public class Vector<T> implements List<T> {
    * @return removed item
    */
   public T swapRemove(int i) {
+    if (i < 0 || i >= size)
+      throw new IndexOutOfBoundsException(i);
+
     int last = size - 1;
+    T rem = get(i);
 
-    T rem = null;
     if (i != last)
-      rem = set(i, get(last));
-    else
-      rem = pop();
+      set(i, get(last));
 
+    pop();
     return rem;
   }
 
