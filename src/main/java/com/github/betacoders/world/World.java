@@ -57,7 +57,7 @@ public class World {
 
     for (int i = enemies.size() - 1; i >= 0; --i) {
       Enemy enemy = enemies.get(i);
-      if (!enemy.tick() || !enemy.alive()) {
+      if (!enemy.tick(base) || !enemy.alive()) {
         enemies.swapRemove(i);
         continue;
       }
@@ -95,12 +95,12 @@ public class World {
   }
 
   private void enemyAttack(Enemy enemy) {
-    if (enemy.attackRange() <= 0.)
+    if (!enemy.canAttack() || enemy.attackRange() <= 0.)
       return;
 
     Cells target = nearestCell(enemy.pos(), enemy.attackRange());
     if (target != null)
-      target.damage(enemy.attackDamage());
+      target.damage(enemy.attack());
   }
 
   private Enemy nearestEnemy(Vec2D from, double range) {

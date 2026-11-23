@@ -2,11 +2,13 @@ package com.github.betacoders.world.enemies;
 
 import com.github.betacoders.collections.Vec2D;
 import com.github.betacoders.world.Base;
+import com.github.betacoders.world.Enemy;
 import com.github.betacoders.world.Cells;
 
-public abstract class Enemy {
+public abstract class EnemyAbs implements Enemy {
   protected static final double DRAG = 0.02;
 
+  protected final int id;
   protected final Vec2D pos;
   protected final Vec2D vel = new Vec2D();
 
@@ -29,9 +31,10 @@ public abstract class Enemy {
   private final Vec2D steer = new Vec2D();
   private final Vec2D acc = new Vec2D();
 
-  protected Enemy(double x, double y, float hpMax, double mass, double rad,
+  protected EnemyAbs(int id, double x, double y, float hpMax, double mass, double rad,
       double velMax, double forceMax, float attackDamage, double attackRange,
       int attackInterval) {
+    this.id = id;
     this.pos = new Vec2D(x, y);
     this.hpMax = hpMax;
     this.hp = hpMax;
@@ -48,6 +51,11 @@ public abstract class Enemy {
   public abstract boolean flying();
 
   public abstract boolean tick(Base base);
+
+  @Override
+  public int id() {
+    return id;
+  }
 
   public Vec2D pos() {
     return pos;
@@ -75,6 +83,25 @@ public abstract class Enemy {
 
   public boolean alive() {
     return hp > 0f;
+  }
+
+  @Override
+  public double attackRange() {
+    return attackRange;
+  }
+
+  @Override
+  public boolean canAttack() {
+    return cooldown <= 0;
+  }
+
+  @Override
+  public float attack() {
+    if (!canAttack())
+      return 0f;
+
+    cooldown = attackInterval;
+    return attackDamage;
   }
 
   public void damage(float amount) {
@@ -132,7 +159,8 @@ public abstract class Enemy {
   }
 
   protected boolean tryAttack() {
-    if (cooldown > 0 || !inRange(target)) return false;
+    if (cooldown > 0 || !inRange(target))
+      return false;
 
     target.damage(attackDamage);
     cooldown = attackInterval;
@@ -141,7 +169,8 @@ public abstract class Enemy {
 
   private static void normalizeInPlace(Vec2D v) {
     double len = Math.sqrt(v.x * v.x + v.y * v.y);
-    if (len > 0) v.divide(len);
+    if (len > 0)
+      v.divide(len);
   }
 
   private static void limitInPlace(Vec2D v, double max) {

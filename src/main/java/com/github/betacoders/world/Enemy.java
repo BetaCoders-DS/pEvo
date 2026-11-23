@@ -11,13 +11,11 @@ public interface Enemy {
 
   void damage(float amount);
 
-  default float attackDamage() {
-    return 0f;
-  }
+  double attackRange();
 
-  default double attackRange() {
-    return 0.;
-  }
+  boolean canAttack();
 
-  boolean tick();
+  float attack();
+
+  boolean tick(Base base);
 }
