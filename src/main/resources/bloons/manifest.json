@@ -1,0 +1,81 @@
+{
+  "characters": "Bloons / Ninja Kiwi",
+  "sprite_art": "Derek_and_Harum1; sede: Kenney / Tiny Town",
+  "perspective": "top-down",
+  "mirror": "https://github.com/EverydayCodeNet/BTD-CE",
+  "mirror_commit": "4facdaa4aebb70201338f93e80b35a6f1fae5b2c",
+  "assets": [
+    {
+      "file": "dart-monkey.png",
+      "source": "https://raw.githubusercontent.com/EverydayCodeNet/BTD-CE/4facdaa4aebb70201338f93e80b35a6f1fae5b2c/media/shapes/Derek_and_Harum1_Sprites_shapes/towers/dart/dart1.png",
+      "sha256": "d88aa9e5d45066914b07d2a5255c0d18305880cd1b83dec3dfd0ec2ad23be174"
+    },
+    {
+      "file": "engineer-monkey.png",
+      "source": "https://raw.githubusercontent.com/EverydayCodeNet/BTD-CE/4facdaa4aebb70201338f93e80b35a6f1fae5b2c/media/shapes/Derek_and_Harum1_Sprites_shapes/towers/engineer/engineer1.png",
+      "sha256": "e2ed813e58cfb6db767b1813336a6f338f8f0fc5944406bfdbf75b1982479686"
+    },
+    {
+      "file": "banana-farm.png",
+      "source": "https://raw.githubusercontent.com/EverydayCodeNet/BTD-CE/4facdaa4aebb70201338f93e80b35a6f1fae5b2c/media/shapes/Derek_and_Harum1_Sprites_shapes/towers/bannana_farm/farm1.png",
+      "sha256": "f00fc4b50677c791d47ee6d4097e6d8a402980ff37961f4f13a0773b75540d6a"
+    },
+    {
+      "file": "moab.png",
+      "source": "https://raw.githubusercontent.com/EverydayCodeNet/BTD-CE/4facdaa4aebb70201338f93e80b35a6f1fae5b2c/media/shapes/Derek_and_Harum1_Sprites_shapes/bloons/MOAB/moab_undamaged.png",
+      "sha256": "fd6acf04d25533eb3b361ef8c9f98a510022dd47963a3e12980f802510138c5f"
+    },
+    {
+      "file": "bloon-red.png",
+      "source": "https://raw.githubusercontent.com/EverydayCodeNet/BTD-CE/4facdaa4aebb70201338f93e80b35a6f1fae5b2c/media/shapes/Derek_and_Harum1_Sprites_shapes/bloons/non-regrow/non-camo/red/red_base.png",
+      "sha256": "a80338cc02f84754f9d1905bfedf311611882b7772426b31274d1895f32a2b41"
+    },
+    {
+      "file": "bloon-blue.png",
+      "source": "https://raw.githubusercontent.com/EverydayCodeNet/BTD-CE/4facdaa4aebb70201338f93e80b35a6f1fae5b2c/media/shapes/Derek_and_Harum1_Sprites_shapes/bloons/non-regrow/non-camo/blue.png",
+      "sha256": "400716c7c10d96e8f23de96bb8fc1c8abe8ebf1dff7956a3bd62bf945baa32ff"
+    },
+    {
+      "file": "bloon-green.png",
+      "source": "https://raw.githubusercontent.com/EverydayCodeNet/BTD-CE/4facdaa4aebb70201338f93e80b35a6f1fae5b2c/media/shapes/Derek_and_Harum1_Sprites_shapes/bloons/non-regrow/non-camo/green.png",
+      "sha256": "6d877ddab0a3956dfe6d2fe7c25361b6c3cc04b8257ba3f98d66750e4002a5fe"
+    },
+    {
+      "file": "bloon-yellow.png",
+      "source": "https://raw.githubusercontent.com/EverydayCodeNet/BTD-CE/4facdaa4aebb70201338f93e80b35a6f1fae5b2c/media/shapes/Derek_and_Harum1_Sprites_shapes/bloons/non-regrow/non-camo/yellow.png",
+      "sha256": "693a339ea30b7d8ee402ba6b00587c7266a6e2c04b03c7c2256b08c74ba45ef5"
+    },
+    {
+      "file": "bloon-pink.png",
+      "source": "https://raw.githubusercontent.com/EverydayCodeNet/BTD-CE/4facdaa4aebb70201338f93e80b35a6f1fae5b2c/media/shapes/Derek_and_Harum1_Sprites_shapes/bloons/non-regrow/non-camo/pink.png",
+      "sha256": "87ab6b6118df16a0b9e2e3253a53b9fbb66cd2886debc8ca6d99acbd4c4856c3"
+    },
+    {
+      "file": "bloon-rainbow.png",
+      "source": "https://raw.githubusercontent.com/EverydayCodeNet/BTD-CE/4facdaa4aebb70201338f93e80b35a6f1fae5b2c/media/shapes/Derek_and_Harum1_Sprites_shapes/bloons/non-regrow/non-camo/rainbow.png",
+      "sha256": "1aa227a2665884854ba8a0a421af3d946dc15710658730e31e83189cc8293308"
+    },
+    {
+      "file": "core-house-atlas.png",
+      "source": "https://opengameart.org/sites/default/files/kenney_tiny-town.zip",
+      "archive_path": "Tilemap/tilemap_packed.png",
+      "author": "Kenney",
+      "license": "CC0",
+      "sha256": "3a54d99ecde790d4fdea207a3644cf130fc56fa838f1beb1507c185a95b8e902",
+      "runtime_tiles": [
+        52,
+        53,
+        54,
+        64,
+        65,
+        66,
+        76,
+        88,
+        79,
+        76,
+        89,
+        79
+      ]
+    }
+  ]
+}
