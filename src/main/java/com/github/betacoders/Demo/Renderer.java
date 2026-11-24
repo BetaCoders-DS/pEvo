@@ -7,6 +7,9 @@ import com.github.betacoders.world.Enemy;
 import com.github.betacoders.world.Link;
 import com.github.betacoders.world.Packet;
 import com.github.betacoders.world.World;
+import com.github.betacoders.world.enemies.ColossalEnemy;
+import com.github.betacoders.world.enemies.FlyingEnemy;
+import com.github.betacoders.world.enemies.GroundEnemy;
 
 import processing.core.PApplet;
 
@@ -33,7 +36,10 @@ public final class Renderer {
     draw(world, 0, 0, g.width, g.height);
   }
 
-  /** Desenha um mundo na área do painel, preservando a proporção e recortando as bordas. */
+  /**
+   * Desenha um mundo na área do painel, preservando a proporção e recortando as
+   * bordas.
+   */
   public void draw(World world, float x, float y, float panelW, float panelH) {
     if (panelW <= 0 || panelH <= 0)
       return;
@@ -117,8 +123,7 @@ public final class Renderer {
         70 + 185 * t,
         190 - 130 * t,
         90,
-        200
-    );
+        200);
 
     // Quanto maior o congestionamento, mais grossa a linha.
     g.strokeWeight(2 + l.load());
@@ -128,8 +133,7 @@ public final class Renderer {
         (float) a.x,
         (float) a.y,
         (float) b.x,
-        (float) b.y
-    );
+        (float) b.y);
   }
 
   /**
@@ -159,8 +163,7 @@ public final class Renderer {
             x,
             y,
             (float) (t.range() * 2),
-            (float) (t.range() * 2)
-        );
+            (float) (t.range() * 2));
       }
 
       // Desenha a célula propriamente dita.
@@ -193,8 +196,7 @@ public final class Renderer {
             c.hp() / c.hpMax(),
             90,
             220,
-            110
-        );
+            110);
       }
     }
   }
@@ -243,8 +245,7 @@ public final class Renderer {
           (float) pos.x,
           (float) pos.y,
           9,
-          9
-      );
+          9);
     }
   }
 
@@ -259,9 +260,14 @@ public final class Renderer {
 
     g.stroke(10, 12, 18);
     g.strokeWeight(1);
-    g.fill(220, 60, 70);
 
     for (Enemy e : world.enemies()) {
+      if (e instanceof FlyingEnemy)
+        g.fill(220, 60, 70);
+      else if (e instanceof GroundEnemy)
+        g.fill(220, 180, 70);
+      else if (e instanceof ColossalEnemy)
+        g.fill(220, 180, 180);
 
       // Não desenha inimigos que já morreram.
       if (!e.alive()) {
@@ -270,12 +276,10 @@ public final class Renderer {
 
       Vec2D pos = e.pos();
 
-      g.ellipse(
+      g.circle(
           (float) pos.x,
           (float) pos.y,
-          14,
-          14
-      );
+          e instanceof ColossalEnemy ? 50 : 14);
     }
   }
 
@@ -309,8 +313,7 @@ public final class Renderer {
           startX + i * (size + 2) + size / 2,
           y + d / 2 + 8,
           size,
-          size
-      );
+          size);
     }
   }
 

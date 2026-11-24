@@ -27,7 +27,7 @@ public record EvolutionConfig(
 
   public static EvolutionConfig standard() {
     return new EvolutionConfig(
-        2, 1000, 700, 5, 12, 5, 0, 3, 30);
+        50, 1000, 700, 5, 12, 5, 0, 3, 30);
   }
 
   public int minCells(int generation) {

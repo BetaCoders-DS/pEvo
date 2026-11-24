@@ -41,9 +41,10 @@ public class EnemyWaveFact implements WaveFactory {
             config.velMax(), config.forceMax(), damage,
             config.attackRange(), config.attackInterval());
       else
-        enem = new FlyingEnemy(firstId + i, 0., 0., hp, config.rad(),
-            config.velMax(), config.forceMax(), damage,
-            config.attackRange(), config.attackInterval());
+        enem = new GroundEnemy(firstId + i, 0., 0., hp, GroundEnemy.MASS,
+            GroundEnemy.RAD, GroundEnemy.VEL_MAX, GroundEnemy.FORCE_MAX,
+            damage, config.attackRange(), config.attackInterval(),
+            StraightNavigator.INSTANCE);
 
       enemies.add(enem);
     }

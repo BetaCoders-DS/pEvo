@@ -27,9 +27,9 @@ public class WaveSim implements Simulation {
       double forceMax) {
 
     public static final WaveConfig DEFAULT = new WaveConfig(
-        2, 0.5, 12, 40, 320., 12.,
+        2, 0.5, 36, 40, 320., 12.,
         40.f, 0.25, 8.f, 0.2,
-        26., 30, 14., 45., 300.);
+        26., 30, 14., 10., 300.);
 
     public WaveConfig {
       if (baseCount < 1 || countGrowth < 0. || spawnInterval < 1 || interWaveDelay < 0 || spawnRadius <= 0.

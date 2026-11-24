@@ -4,7 +4,9 @@ import java.util.Objects;
 
 import com.github.betacoders.algo.AStarPathfinder;
 import com.github.betacoders.collections.Graph;
+import com.github.betacoders.collections.HashMap;
 import com.github.betacoders.collections.List;
+import com.github.betacoders.collections.Map;
 import com.github.betacoders.collections.Vec2D;
 import com.github.betacoders.collections.Vector;
 
@@ -14,12 +16,15 @@ import com.github.betacoders.collections.Vector;
 public class Base {
   private static final double PACKET_SPEED = 4.;
   private static final double EDGE_REST_LENGTH = 70.;
-  private static final double MAX_ATTRACTION_STEP = 1.;
+  private static final double LINK_K = 0.15;
+  private static final double REPULSION_K = 2500.;
+  private static final double MAX_SETTLE_STEP = 1.;
 
   private final Graph<Cells, Link> graph;
   private Cells.Core core;
   private final AStarPathfinder<Cells, Link> pathfinder;
   private final Vector<Packet> packets;
+  private final Map<Cells, Vec2D> displacement = new HashMap<>();
 
   private final double totalEdgeLength;
 
@@ -69,12 +74,29 @@ public class Base {
     return sum;
   }
 
-  public void attractOnce() {
+  public void settleOnce() {
+    for (Vec2D d : displacement.values()) {
+      d.x = 0.;
+      d.y = 0.;
+    }
+
     for (Link l : graph.edges())
-      attract(l);
+      accumulateLinkForce(l);
+
+    List<Cells> verts = graph.vertices();
+    for (int i = 0; i < verts.size(); ++i)
+      for (int j = i + 1; j < verts.size(); ++j)
+        accumulateRepulsion(verts.get(i), verts.get(j));
+
+    for (Map.Entry<Cells, Vec2D> e : displacement.entrySet()) {
+      Vec2D p = e.key().pos();
+      Vec2D d = e.value();
+      p.x += d.x;
+      p.y += d.y;
+    }
   }
 
-  private void attract(Link l) {
+  private void accumulateLinkForce(Link l) {
     Cells a = l.a();
     Cells b = l.b();
     Vec2D pa = a.pos();
@@ -83,19 +105,53 @@ public class Base {
     double dx = pb.x - pa.x;
     double dy = pb.y - pa.y;
     double dist = Math.hypot(dx, dy);
-    if (dist <= EDGE_REST_LENGTH || dist == 0.)
+    if (dist <= EDGE_REST_LENGTH)
       return;
 
-    double excess = dist - EDGE_REST_LENGTH;
-    double step = Math.min(excess, MAX_ATTRACTION_STEP) / dist;
+    double force = Math.min(MAX_SETTLE_STEP, LINK_K * (dist - EDGE_REST_LENGTH));
     double totalMass = a.mass() + b.mass();
     double aShare = b.mass() / totalMass;
     double bShare = a.mass() / totalMass;
+    double ux = dx / dist;
+    double uy = dy / dist;
 
-    pa.x += dx * step * aShare;
-    pa.y += dy * step * aShare;
-    pb.x -= dx * step * bShare;
-    pb.y -= dy * step * bShare;
+    accum(a, force * ux * aShare, force * uy * aShare);
+    accum(b, -force * ux * bShare, -force * uy * bShare);
+  }
+
+  private void accumulateRepulsion(Cells a, Cells b) {
+    Vec2D pa = a.pos();
+    Vec2D pb = b.pos();
+
+    double dx = pb.x - pa.x;
+    double dy = pb.y - pa.y;
+    double dist = Math.hypot(dx, dy);
+    if (dist == 0.) {
+      dx = a.id() < b.id() ? 1. : -1.;
+      dy = 0.;
+      dist = 1.;
+    }
+
+    double force = Math.min(
+        MAX_SETTLE_STEP, REPULSION_K / (dist * dist));
+    double totalMass = a.mass() + b.mass();
+    double aShare = b.mass() / totalMass;
+    double bShare = a.mass() / totalMass;
+    double ux = dx / dist;
+    double uy = dy / dist;
+
+    accum(a, -force * ux * aShare, -force * uy * aShare);
+    accum(b, force * ux * bShare, force * uy * bShare);
+  }
+
+  private void accum(Cells cell, double x, double y) {
+    Vec2D d = displacement.get(cell);
+    if (d == null) {
+      d = new Vec2D();
+      displacement.put(cell, d);
+    }
+    d.x += x;
+    d.y += y;
   }
 
   public Graph<Cells, Link> graph() {
@@ -115,7 +171,7 @@ public class Base {
   }
 
   public boolean tick() {
-    attractOnce();
+    settleOnce();
     pruneDeadCells();
     tickCells();
     dispatchAmmo();

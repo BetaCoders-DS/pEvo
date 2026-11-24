@@ -25,7 +25,7 @@ public class World {
     this.enemies = new Vector<>();
 
     for (int i = 0; i < SETTLE_TICKS; i++)
-      base.attractOnce();
+      base.settleOnce();
   }
 
   public Base base() {

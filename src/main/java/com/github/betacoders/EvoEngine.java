@@ -15,8 +15,17 @@ import com.github.betacoders.world.World;
  * A interface exibe os mundos sem controlar suas regras de evolução.
  */
 public final class EvoEngine {
+  private static final int DEFAULT_TPS = 60;
+  private static final int MIN_TPS = 10;
+  private static final int MAX_TPS = 1000;
+  private static final int TPS_STEP = 10;
+  private static final int MAX_STEPS_PER_FRAME = 16;
+
   private final EvolutionConfig config;
   private final EvolutionExperiment experiment;
+
+  private int ticksPerSecond = DEFAULT_TPS;
+  private double extraBudget;
 
   public EvoEngine(EvolutionConfig config) {
     this(config, WaveConfig.DEFAULT);
@@ -33,12 +42,47 @@ public final class EvoEngine {
         (world, scenarioSeed) -> new WaveSim(world, scenarioSeed, new EnemyWaveFact(), waveConfig));
   }
 
-  /** Chamado uma vez por quadro, somente pela janela principal. */
-  public synchronized void step() {
+  public void step() {
     experiment.step();
   }
 
-  public synchronized World worldAt(int index) {
+  public void advance(double millis) {
+    if (ticksPerSecond <= DEFAULT_TPS) {
+      extraBudget = 0.;
+      return;
+    }
+
+    double target = 1000. / ticksPerSecond;
+    double elapsed = Math.max(0., Math.min(millis, 250.));
+
+    extraBudget += elapsed / target - 1.;
+
+    int steps = 0;
+    while (extraBudget >= 1. && steps < MAX_STEPS_PER_FRAME) {
+      experiment.step();
+      extraBudget -= 1.;
+      ++steps;
+    }
+
+    if (extraBudget > MAX_STEPS_PER_FRAME)
+      extraBudget = MAX_STEPS_PER_FRAME;
+  }
+
+  public int ticksPerSecond() {
+    return ticksPerSecond;
+  }
+
+  public void increaseSpeed() {
+    ticksPerSecond = Math.min(MAX_TPS, ticksPerSecond + TPS_STEP);
+    extraBudget = 0.;
+  }
+
+  public void decreaseSpeed() {
+    ticksPerSecond = Math.max(MIN_TPS, ticksPerSecond - TPS_STEP);
+    extraBudget = 0.;
+  }
+
+  public World worldAt(int index) {
     if (index < 0 || index >= populationSize()) {
       throw new IndexOutOfBoundsException(
           "Índice de indivíduo inválido: " + index);
@@ -55,31 +99,31 @@ public final class EvoEngine {
     return config.populationSize();
   }
 
-  public synchronized int generation() {
+  public int generation() {
     return experiment.generation();
   }
 
-  public synchronized boolean generationFinished() {
+  public boolean generationFinished() {
     return experiment.generationFinished();
   }
 
-  public synchronized SimulationResult[] previousRanking() {
+  public SimulationResult[] previousRanking() {
     return experiment.previousRanking();
   }
 
-  public synchronized long seed() {
+  public long seed() {
     return experiment.seed();
   }
 
-  public synchronized long scenarioSeed() {
+  public long scenarioSeed() {
     return experiment.scenarioSeed();
   }
 
-  public synchronized void restart() {
+  public void restart() {
     experiment.restart();
   }
 
-  public synchronized void restart(long seed) {
+  public void restart(long seed) {
     experiment.restart(seed);
   }
 }
