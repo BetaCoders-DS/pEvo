@@ -3,8 +3,9 @@ package com.github.betacoders.sketch;
 /** Calcula os painéis e guarda o foco sem depender do Processing ou dos mundos. */
 public final class PopulationView {
     public static final int MARGIN = 16;
-    public static final int HEADER_HEIGHT = 68;
+    public static final int HEADER_HEIGHT = 102;
     public static final int PANEL_HEADER_HEIGHT = 30;
+    public static final int PANEL_FOOTER_HEIGHT = 16;
     public static final int PANEL_INSET = 3;
     private static final int GAP = 10;
 
@@ -33,7 +34,7 @@ public final class PopulationView {
         float availableWidth = width - 2f * MARGIN;
         float availableHeight = height - HEADER_HEIGHT - MARGIN;
         if (availableWidth <= 2 * PANEL_INSET
-                || availableHeight <= PANEL_HEADER_HEIGHT + PANEL_INSET) {
+                || availableHeight <= PANEL_HEADER_HEIGHT + PANEL_FOOTER_HEIGHT + PANEL_INSET) {
             return new Panel[0];
         }
 
@@ -51,7 +52,7 @@ public final class PopulationView {
             float panelWidth = (availableWidth - (candidate - 1) * GAP) / candidate;
             float panelHeight = (availableHeight - (rows - 1) * GAP) / rows;
             double scale = Math.min((panelWidth - 2 * PANEL_INSET) / worldWidth,
-                (panelHeight - PANEL_HEADER_HEIGHT - PANEL_INSET) / worldHeight);
+                (panelHeight - PANEL_HEADER_HEIGHT - PANEL_FOOTER_HEIGHT - PANEL_INSET) / worldHeight);
             if (scale > bestScale) {
                 bestScale = scale;
                 columns = candidate;

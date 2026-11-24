@@ -70,6 +70,8 @@ class SketchTest {
             World world = new World(new Base(graph));
             world.addEnemy(new FlyingEnemy(1, 2000, 350));
 
+            // O uso de sprites altera imageMode; o recorte deve continuar em coordenadas do painel.
+            graphics.imageMode(PApplet.CENTER);
             new Renderer(applet, 1000, 700).draw(world, 50, 60, 200, 100);
             graphics.loadPixels();
             for (int y = 0; y < graphics.height; y++) {
