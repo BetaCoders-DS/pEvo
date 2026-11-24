@@ -1,8 +1,8 @@
 package com.github.betacoders.render;
 
 public final class Theme {
-  public static final int WINDOW_BG = 0xff0d2438;
-  public static final int ARENA_BG = 0xff7ca64f;
+  public static final int WINDOW_BG = 0xff202020;
+  public static final int ARENA_BG = 0xff202020;
 
   public static final int HEADER_BG = 0xff174164;
   public static final int HEADER_RULE = 0xffedb940;
