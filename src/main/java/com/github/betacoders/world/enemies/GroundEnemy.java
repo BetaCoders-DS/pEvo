@@ -4,7 +4,6 @@ import com.github.betacoders.collections.Vec2D;
 import com.github.betacoders.world.Base;
 import com.github.betacoders.world.Cells;
 
-
 public class GroundEnemy extends EnemyAbs {
   public static final float HP_MAX = 80f;
   public static final double MASS = 1.;
@@ -15,19 +14,22 @@ public class GroundEnemy extends EnemyAbs {
   public static final double ATTACK_RANGE = 6.;
   public static final int ATTACK_INTERVAL = 45;
 
+  private static final int RECOMPUTE_INTERVAL = 10;
+
   private final GroundNavigator navigator;
   private final Vec2D waypoint = new Vec2D();
 
   private Cells blocker;
   private int lastGraphSize = -1;
+  private int recomputeTimer;
   private int recomputations;
 
   public GroundEnemy(int id, double x, double y) {
     this(id, x, y, HP_MAX, MASS, RAD, VEL_MAX, FORCE_MAX,
-    ATTACK_DAMAGE, ATTACK_RANGE, ATTACK_INTERVAL, StraightNavigator.INSTANCE);
-}
+        ATTACK_DAMAGE, ATTACK_RANGE, ATTACK_INTERVAL, StraightNavigator.INSTANCE);
+  }
 
-   protected GroundEnemy(int id, double x, double y, float hpMax, double mass,
+  protected GroundEnemy(int id, double x, double y, float hpMax, double mass,
       double rad, double velMax, double forceMax, float attackDamage,
       double attackRange, int attackInterval, GroundNavigator navigator) {
     super(id, x, y, hpMax, mass, rad, velMax, forceMax,
@@ -51,13 +53,17 @@ public class GroundEnemy extends EnemyAbs {
 
     tickCooldown();
 
-    if (needsRecompute(base)) {
+    if (--recomputeTimer <= 0
+        || lastGraphSize != base.graph().size()
+        || (blocker != null && !blocker.alive())) {
       blocker = navigator.navigate(this, base, waypoint);
       lastGraphSize = base.graph().size();
+      recomputeTimer = RECOMPUTE_INTERVAL;
       ++recomputations;
     }
 
     target = blocker != null ? blocker : base.core();
+    updateWaypoint(target);
 
     if (inHoldRange(target))
       stop();
@@ -68,9 +74,22 @@ public class GroundEnemy extends EnemyAbs {
     return true;
   }
 
-  private boolean needsRecompute(Base base) {
-    return lastGraphSize != base.graph().size()
-        || (blocker != null && !blocker.alive());
+  private void updateWaypoint(Cells cell) {
+    Vec2D p = cell.pos();
+    double dx = p.x - pos.x;
+    double dy = p.y - pos.y;
+    double dist = Math.hypot(dx, dy);
+    double holdDist = cell.rad() + rad + attackRange * HOLD_FRACTION;
+
+    if (dist <= holdDist) {
+      waypoint.x = p.x;
+      waypoint.y = p.y;
+      return;
+    }
+
+    double scale = holdDist / dist;
+    waypoint.x = p.x - dx * scale;
+    waypoint.y = p.y - dy * scale;
   }
 
   public Cells blocker() {
