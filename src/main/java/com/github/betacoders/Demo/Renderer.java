@@ -199,13 +199,13 @@ public final class Renderer {
     for (Enemy enemy : world.enemies()) {
       if (!enemy.alive())
         continue;
-      Sprite sprite = BloonsSprites.enemy(world.wave(), enemy.id());
-      boolean moab = sprite == Sprite.MOAB;
-      float size = moab ? 94 : 34;
+      Sprite sprite = BloonsSprites.enemy(enemy);
+      boolean colossal = sprite == Sprite.MAHORAGA;
+      float size = colossal ? 94 : 34;
       float x = (float) enemy.pos().x;
       float y = (float) enemy.pos().y;
       float angle = 0;
-      if (moab && enemy instanceof EnemyAbs flying
+      if (colossal && enemy instanceof EnemyAbs flying
           && flying.vel().x * flying.vel().x + flying.vel().y * flying.vel().y > 0.01) {
         angle = (float) Math.atan2(flying.vel().y, flying.vel().x) + PApplet.PI;
       }
@@ -217,11 +217,11 @@ public final class Renderer {
         drawHealth(x - size / 2, y - size / 2 - 7, size, 4,
             damageable.hp() / damageable.hpMax());
       }
-      if (details && moab) {
+      if (details && colossal) {
         g.fill(22, 49, 65);
         g.textAlign(PApplet.CENTER, PApplet.BOTTOM);
         g.textSize(12);
-        g.text("MOAB", x, y - size / 2 - 10);
+        g.text("COLOSSAL", x, y - size / 2 - 10);
       }
     }
   }

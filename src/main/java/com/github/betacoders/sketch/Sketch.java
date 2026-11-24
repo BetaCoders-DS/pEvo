@@ -109,8 +109,9 @@ public class Sketch extends PApplet {
         drawLegend(Sprite.RELAY, "Conector", 16 + slot * 2, 76);
         drawLegend(Sprite.EXTRACTOR, "Extrator", 16 + slot * 3, 76);
         if (width >= 850) {
-            drawLegend(Sprite.RED, "Bloons", 16 + slot * 4, 76);
-            drawLegend(Sprite.MOAB, "MOAB · a cada 5 ondas", 16 + slot * 5, 76);
+            drawLegend(Sprite.GROUND, "Terrestre", 16 + slot * 4, 76);
+            drawLegend(Sprite.AEREO, "Aéreo", 16 + slot * 5, 76);
+            drawLegend(Sprite.MAHORAGA, "Colossal", 16 + slot * 6, 76);
         }
         noStroke();
         fill(237, 185, 64);
@@ -167,13 +168,11 @@ public class Sketch extends PApplet {
         textAlign(RIGHT, CENTER);
         textSize(10);
         fill(world.over() ? color(255, 188, 165) : color(204, 246, 196));
-        if (panel.width() >= 120) {
-            String status = panel.width() < 180
-                ? "O" + world.wave() + " · " + (world.over() ? "FIM" : "ATIVA")
-                : "ONDA " + world.wave() + " · " + (world.over() ? "DERROTADA" : "ATIVA");
-            text(status, panel.x() + panel.width() - 10,
-                panel.y() + PopulationView.PANEL_HEADER_HEIGHT / 2f);
-        }
+        String wave = panel.width() < 180
+            ? "O" + world.wave()
+            : "ONDA " + world.wave();
+        text(wave, panel.x() + panel.width() - 10,
+            panel.y() + PopulationView.PANEL_HEADER_HEIGHT / 2f);
         drawCoreHealth(panel, world);
         popStyle();
     }
