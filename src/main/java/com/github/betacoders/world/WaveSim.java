@@ -27,7 +27,7 @@ public class WaveSim implements Simulation {
       double forceMax) {
 
     public static final WaveConfig DEFAULT = new WaveConfig(
-        2, 0.5, 36, 40, 320., 12.,
+        2, 0.1, 36, 40, 320., 12.,
         40.f, 0.25, 8.f, 0.2,
         26., 30, 14., 10., 300.);
 
