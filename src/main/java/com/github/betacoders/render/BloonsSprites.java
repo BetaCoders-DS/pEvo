@@ -1,4 +1,4 @@
-package com.github.betacoders.Demo;
+package com.github.betacoders.render;
 
 import java.io.IOException;
 import java.io.InputStream;

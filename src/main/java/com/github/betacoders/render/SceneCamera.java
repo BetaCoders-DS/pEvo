@@ -1,4 +1,4 @@
-package com.github.betacoders.Demo;
+package com.github.betacoders.render;
 
 import com.github.betacoders.world.Cells;
 import com.github.betacoders.world.Enemy;
@@ -6,6 +6,8 @@ import com.github.betacoders.world.World;
 
 /** Enquadra os elementos reais da partida para aproveitar melhor as miniaturas. */
 public record SceneCamera(float centerX, float centerY, float width, float height) {
+    private static final double ENEMY_PAD = 40;
+
     public static SceneCamera fit(World world, double worldWidth, double worldHeight) {
         double minX = world.base().core().pos().x;
         double maxX = minX;
@@ -20,10 +22,10 @@ public record SceneCamera(float centerX, float centerY, float width, float heigh
         }
         for (Enemy enemy : world.enemies()) {
             if (!enemy.alive()) continue;
-            minX = Math.min(minX, enemy.pos().x - 40);
-            maxX = Math.max(maxX, enemy.pos().x + 40);
-            minY = Math.min(minY, enemy.pos().y - 40);
-            maxY = Math.max(maxY, enemy.pos().y + 40);
+            minX = Math.min(minX, enemy.pos().x - ENEMY_PAD);
+            maxX = Math.max(maxX, enemy.pos().x + ENEMY_PAD);
+            minY = Math.min(minY, enemy.pos().y - ENEMY_PAD);
+            maxY = Math.max(maxY, enemy.pos().y + ENEMY_PAD);
         }
         return new SceneCamera((float) ((minX + maxX) / 2), (float) ((minY + maxY) / 2),
             (float) Math.max(Math.min(worldWidth, 420), maxX - minX + 100),

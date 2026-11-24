@@ -6,7 +6,7 @@ import java.awt.Font;
 
 import org.junit.jupiter.api.Test;
 
-import com.github.betacoders.Demo.Renderer;
+import com.github.betacoders.render.Renderer;
 import com.github.betacoders.EvoEngine;
 import com.github.betacoders.collections.AdjacencyGraph;
 import com.github.betacoders.evolution.EvolutionConfig;

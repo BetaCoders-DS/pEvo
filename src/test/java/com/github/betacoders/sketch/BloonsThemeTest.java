@@ -4,9 +4,9 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
 
-import com.github.betacoders.Demo.BloonsSprites;
-import com.github.betacoders.Demo.BloonsSprites.Sprite;
-import com.github.betacoders.Demo.SceneCamera;
+import com.github.betacoders.render.BloonsSprites;
+import com.github.betacoders.render.BloonsSprites.Sprite;
+import com.github.betacoders.render.SceneCamera;
 import com.github.betacoders.collections.AdjacencyGraph;
 import com.github.betacoders.world.Base;
 import com.github.betacoders.world.Cells;

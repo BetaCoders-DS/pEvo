@@ -2,10 +2,12 @@ package com.github.betacoders.sketch;
 
 import java.util.Objects;
 
-import com.github.betacoders.Demo.BloonsSprites;
-import com.github.betacoders.Demo.BloonsSprites.Sprite;
-import com.github.betacoders.Demo.Renderer;
 import com.github.betacoders.EvoEngine;
+import com.github.betacoders.render.Bars;
+import com.github.betacoders.render.BloonsSprites;
+import com.github.betacoders.render.BloonsSprites.Sprite;
+import com.github.betacoders.render.Renderer;
+import com.github.betacoders.render.Theme;
 import com.github.betacoders.sketch.PopulationView.Panel;
 import com.github.betacoders.world.World;
 
@@ -16,6 +18,18 @@ public class Sketch extends PApplet {
     private static final int BACK_WIDTH = 166;
     private static final int BACK_HEIGHT = 32;
     private static final int BACK_TOP = 20;
+
+    private static final float TITLE_TEXT = 27;
+    private static final float HEADER_TEXT = 14;
+    private static final float HINT_TEXT = 11;
+    private static final float STATS_TEXT = 14;
+    private static final float LEGEND_TEXT = 11;
+    private static final float LEGEND_TEXT_SMALL = 10;
+    private static final float PANEL_TITLE_TEXT = 11;
+    private static final float PANEL_WAVE_TEXT = 10;
+    private static final float HEALTH_TEXT = 8;
+    private static final float BACK_TEXT = 12;
+    private static final float LEGEND_ICON_SIZE = 23;
 
     private final EvoEngine engine;
     private final PopulationView view;
@@ -38,7 +52,7 @@ public class Sketch extends PApplet {
     public void setup() {
         frameRate(60);
         lastFrameMillis = millis();
-        surface.setTitle("pEvo | Bloons — evolução de bases");
+        surface.setTitle("pEvo | evolução de bases");
         surface.setResizable(true);
         textFont(createFont("SansSerif", 14, true));
     }
@@ -51,7 +65,7 @@ public class Sketch extends PApplet {
         engine.advance(now - lastFrameMillis);
         lastFrameMillis = now;
 
-        background(13, 36, 56);
+        background(Theme.WINDOW_BG);
         drawHeader();
 
         for (Panel panel : view.panels(width, height)) {
@@ -64,19 +78,19 @@ public class Sketch extends PApplet {
         rectMode(CORNER);
         imageMode(CORNER);
         noStroke();
-        fill(23, 65, 100);
+        fill(Theme.HEADER_BG);
         rect(0, 0, width, 94);
 
-        fill(255, 218, 83);
+        fill(Theme.TITLE);
         textAlign(LEFT, BASELINE);
-        textSize(27);
+        textSize(TITLE_TEXT);
         text("pEvo", 16, 30);
-        fill(240, 248, 255);
-        textSize(14);
-        text(view.isFocused() ? "BLOONS / BASE " + (view.focusedIndex() + 1) : "BLOONS / POPULAÇÃO", 105, 27);
+        fill(Theme.TEXT);
+        textSize(HEADER_TEXT);
+        text(view.isFocused() ? "BASE " + (view.focusedIndex() + 1) : "POPULAÇÃO", 105, 27);
 
-        fill(188, 217, 236);
-        textSize(11);
+        fill(Theme.MUTED);
+        textSize(HINT_TEXT);
         String hint = view.isFocused()
             ? "Passe sobre uma torre para ver o alcance. Esc volta à grade."
             : "Todas as bases evoluem juntas. Clique em um quadro para ampliar.";
@@ -93,13 +107,13 @@ public class Sketch extends PApplet {
                 }
             }
             textAlign(RIGHT, BASELINE);
-            textSize(14);
-            fill(255, 224, 112);
+            textSize(STATS_TEXT);
+            fill(Theme.ACCENT);
             text("GERAÇÃO " + engine.generation(), statsRight, 27);
-            textSize(11);
-            fill(188, 237, 192);
+            textSize(HINT_TEXT);
+            fill(Theme.ALIVE);
             text(alive + " / " + engine.populationSize() + " BASES ATIVAS", statsRight, 48);
-            fill(188, 217, 236);
+            fill(Theme.MUTED);
             text(engine.ticksPerSecond() + " tps", statsRight, 68);
         }
 
@@ -114,18 +128,18 @@ public class Sketch extends PApplet {
             drawLegend(Sprite.MAHORAGA, "Colossal", 16 + slot * 6, 76);
         }
         noStroke();
-        fill(237, 185, 64);
+        fill(Theme.HEADER_RULE);
         rect(16, 93, Math.max(0, width - 32), 2);
 
         if (view.isFocused()) {
             boolean hovered = overBackButton(mouseX, mouseY);
-            stroke(255, 222, 111);
+            stroke(hovered ? Theme.BUTTON_STROKE_HOVER : Theme.BUTTON_STROKE);
             strokeWeight(1);
-            fill(hovered ? color(255, 213, 78) : color(40, 95, 136));
+            fill(hovered ? Theme.BUTTON_FILL_HOVER : Theme.BUTTON_FILL);
             rect(backLeft(), BACK_TOP, BACK_WIDTH, BACK_HEIGHT, 6);
-            fill(hovered ? color(45, 57, 38) : color(255, 245, 202));
+            fill(hovered ? Theme.BUTTON_TEXT_HOVER : Theme.BUTTON_TEXT);
             textAlign(CENTER, CENTER);
-            textSize(12);
+            textSize(BACK_TEXT);
             text("Voltar à grade  [Esc]", backLeft() + BACK_WIDTH / 2f, BACK_TOP + BACK_HEIGHT / 2f);
         }
         popStyle();
@@ -133,12 +147,12 @@ public class Sketch extends PApplet {
 
     private void drawLegend(Sprite sprite, String label, float x, float y) {
         PImage image = BloonsSprites.image(sprite);
-        float factor = 23f / Math.max(image.width, image.height);
+        float factor = LEGEND_ICON_SIZE / Math.max(image.width, image.height);
         imageMode(CENTER);
         image(image, x + 11, y - 1, image.width * factor, image.height * factor);
-        fill(222, 239, 248);
+        fill(Theme.LEGEND_TEXT);
         textAlign(LEFT, CENTER);
-        textSize(width >= 850 ? 11 : 10);
+        textSize(width >= 850 ? LEGEND_TEXT : LEGEND_TEXT_SMALL);
         text(label, x + 29, y);
     }
 
@@ -147,9 +161,9 @@ public class Sketch extends PApplet {
         pushStyle();
         rectMode(CORNER);
         strokeWeight(hovered ? 2 : 1);
-        stroke(hovered ? color(255, 219, 83)
-            : world.over() ? color(142, 112, 100) : color(73, 131, 166));
-        fill(world.over() ? color(60, 73, 81) : color(29, 78, 115));
+        stroke(hovered ? Theme.PANEL_STROKE_HOVER
+            : world.over() ? Theme.PANEL_STROKE_OVER : Theme.PANEL_STROKE);
+        fill(world.over() ? Theme.PANEL_FILL_OVER : Theme.PANEL_FILL);
         rect(panel.x(), panel.y(), panel.width(), panel.height(), 6);
 
         float inset = PopulationView.PANEL_INSET;
@@ -161,13 +175,13 @@ public class Sketch extends PApplet {
             view.isFocused());
 
         textAlign(LEFT, CENTER);
-        textSize(11);
-        fill(255, 245, 204);
+        textSize(PANEL_TITLE_TEXT);
+        fill(Theme.PANEL_TEXT);
         text("BASE " + (panel.individualIndex() + 1), panel.x() + 10,
             panel.y() + PopulationView.PANEL_HEADER_HEIGHT / 2f);
         textAlign(RIGHT, CENTER);
-        textSize(10);
-        fill(world.over() ? color(255, 188, 165) : color(204, 246, 196));
+        textSize(PANEL_WAVE_TEXT);
+        fill(world.over() ? Theme.WAVE_TEXT_OVER : Theme.WAVE_TEXT);
         String wave = panel.width() < 180
             ? "O" + world.wave()
             : "ONDA " + world.wave();
@@ -183,18 +197,15 @@ public class Sketch extends PApplet {
         float top = panel.y() + panel.height() - PopulationView.PANEL_FOOTER_HEIGHT;
         float barWidth = Math.max(8, panel.width() - 108);
         noStroke();
-        fill(18, 50, 75);
+        fill(Theme.HEALTH_BG);
         rect(panel.x() + 3, top, panel.width() - 6, PopulationView.PANEL_FOOTER_HEIGHT - 3, 2);
-        textSize(8);
+        textSize(HEALTH_TEXT);
         textAlign(LEFT, CENTER);
-        fill(202, 224, 234);
+        fill(Theme.HEALTH_LABEL);
         text("SEDE", panel.x() + 10, top + 6);
-        fill(10, 31, 45);
-        rect(panel.x() + 55, top + 3, barWidth, 6, 2);
-        fill(health < 0.3f ? color(250, 121, 85) : color(176, 231, 92));
-        rect(panel.x() + 55, top + 3, barWidth * health, 6, 2);
+        Bars.health(this, panel.x() + 55, top + 3, barWidth, 6, health);
         textAlign(RIGHT, CENTER);
-        fill(242, 247, 218);
+        fill(Theme.HEALTH_PERCENT);
         text(Math.round(health * 100) + "%", panel.x() + panel.width() - 10, top + 6);
     }
 
